@@ -1,0 +1,26 @@
+{% extends 'catalog/base.html' %}
+
+{% block content %}
+<h2>Добро пожаловать в виртуальную библиотеку</h2>
+<p>Выберите категорию для просмотра изображений:</p>
+
+<div class="category-list">
+    {% for category in categories %}
+    <div class="category-card">
+        <h3>{{ category.name }}</h3>
+        {% if category.description %}
+        <p>{{ category.description }}</p>
+        {% endif %}
+        <a href="{% url 'image_list' %}?category={{ category.id }}">
+            Просмотреть изображения
+        </a>
+    </div>
+    {% empty %}
+    <p>Категории пока не добавлены.</p>
+    {% endfor %}
+</div>
+
+<div>
+    <a href="{% url 'image_list' %}">Просмотреть все изображения</a>
+</div>
+{% endblock %}
