@@ -74,7 +74,8 @@
 
         /* LIST VIEW: фиксированная высота, фиксированные колонки, трёнкат */
         #files-grid.list-view { display: flex; flex-direction: column; gap: 0.25rem; }
-        #files-grid.list-view .file-card { display: flex; align-items: center; height: 72px; padding: 0; border-radius: 0; border-left: none; border-right: none; border-top: none; box-sizing: border-box; }
+        /* ensure full-width on list items */
+        #files-grid.list-view .file-card { display: flex; align-items: center; height: 72px; padding: 0; border-radius: 0; border-left: none; border-right: none; border-top: none; box-sizing: border-box; width: 100%; }
         #files-grid.list-view .file-card:first-child { border-top: 1px solid #e4e4e7; border-top-left-radius: .75rem; border-top-right-radius: .75rem; }
         #files-grid.list-view .file-card:last-child { border-bottom-left-radius: .75rem; border-bottom-right-radius: .75rem; }
 
@@ -83,12 +84,36 @@
         #files-grid.list-view .thumb img { width:100%; height:100%; object-fit:cover; display:block; }
 
         /* meta (центр) */
-        #files-grid.list-view .meta { flex:1 1 auto; min-width:0; padding:0 12px; display:flex; align-items:center; gap:12px; }
+        #files-grid.list-view .meta { flex:1 1 auto; min-width:0; padding:0 12px; display:flex; align-items:center; gap:12px; box-sizing:border-box; }
+        /* inline info row for list mode */
+        #files-grid.list-view .meta .info-inline { display:flex; align-items:center; gap:10px; width:100%; min-width:0; }
         #files-grid.list-view .meta .title { flex:1 1 auto; min-width:0; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; font-size:.9375rem; font-weight:500; color:#111827; }
-        #files-grid.list-view .meta .sub { flex:0 0 auto; white-space:nowrap; color:#6b7280; font-size:12px; }
+        #files-grid.list-view .meta .attrs { display:flex; gap:8px; flex:0 0 auto; align-items:center; }
+        #files-grid.list-view .meta .attrs .attr { font-size:12px; color:#6b7280; white-space:nowrap; max-width:120px; overflow:hidden; text-overflow:ellipsis; }
+        /* hide grid-only elements in list mode */
+        #files-grid.list-view .meta .grid-only { display:none; }
+
+        /* Grid-mode shows grid-only elements */
+        #files-grid.grid-view .meta .grid-only { display:block; }
 
         /* actions (право) */
         #files-grid.list-view .actions { flex:0 0 120px; display:flex; justify-content:flex-end; align-items:center; padding:0 12px; gap:8px; color:#6b7280; font-size:12px; box-sizing:border-box; }
+
+        /* adjust actions for very small screens to avoid overflow */
+        @media (max-width: 420px) {
+            #files-grid.list-view .actions { flex:0 0 80px; padding:0 8px; }
+            #files-grid.list-view .meta .attrs .attr { max-width:84px; font-size:11px; }
+            #files-grid.list-view .meta { padding:0 8px; gap:8px; }
+        }
+
+        /* Prevent mobile native tap highlight/gestures on cards & thumbs */
+        .file-card, .file-card img, .thumb {
+            -webkit-tap-highlight-color: transparent;
+            -webkit-user-drag: none;
+            -webkit-touch-callout: none;
+            touch-action: manipulation; /* help avoid default double-tap gestures interfering */
+            user-select: none;
+        }
 
         /* Indicator (check) — визуально, не влияет на layout */
         .file-selected-indicator { position:absolute; left:10px; top:10px; pointer-events:none; z-index:10; }
@@ -180,6 +205,7 @@
             height: auto;
             object-fit: contain;
             display: block;
+            cursor: zoom-in; /* only preview image has zoom cursor */
         }
         #file-preview i {
             width: 48px;
@@ -227,13 +253,79 @@
             /* decrease preview height on small screens */
             :root { --preview-height: 160px; }
         }
+
+        /* ADDITIONAL MOBILE SIDEBAR/GRID ADAPTATIONS */
+        @media (max-width: 900px) {
+            /* make sidebar off-canvas on mobile */
+            .sidebar {
+                position: fixed;
+                left: 0;
+                top: 0;
+                height: 100vh;
+                transform: translateX(-110%);
+                z-index: 1300;
+                background: #ffffff;
+                box-shadow: 8px 0 30px rgba(2,6,23,.12);
+                transition: transform 220ms ease;
+                width: 16rem;
+            }
+            .sidebar.open { transform: translateX(0); }
+
+            /* small header adjustments */
+            header#page-header { padding-left: 0.75rem; padding-right: 0.75rem; }
+
+            /* show hamburger button (we hide it on md and up using tailwind classes in markup) */
+        }
+
+        /* mobile backdrop for sidebar/details */
+        .mobile-backdrop {
+            position: fixed;
+            inset: 0;
+            background: rgba(0,0,0,0.32);
+            z-index: 1250;
+            display: none;
+            transition: opacity .18s ease;
+            opacity: 0;
+        }
+        .mobile-backdrop.active { display:block; opacity: 1; }
+
+        /* extra small screens tweaks */
+        @media (max-width: 640px) {
+            #files-grid.grid-view { grid-template-columns: repeat(1, minmax(0,1fr)); }
+            :root { --preview-height: 140px; }
+            #files-grid.list-view .thumb { width: 56px; height: 56px; flex: 0 0 56px; }
+            #files-grid.list-view .file-card { height: 64px; }
+            #files-grid.list-view .actions { flex: 0 0 96px; }
+
+            /* ---- USER REQUESTED ADAPTATIONS ---- */
+            /* hide view toggle on phones */
+            #view-toggle { display: none !important; }
+
+            /* admin button: show only icon (hide text) */
+            .admin-label { display: none !important; }
+
+            /* shorten placeholder visually with CSS padding adjustments if needed */
+            #search-input { padding-left: 2.25rem; }
+
+            /* ensure header elements fit */
+            header#page-header { gap: 0.5rem; }
+        }
+
+        @media (max-width: 420px) {
+            :root { --preview-height: 120px; }
+            #files-grid.list-view .thumb { width: 48px; height: 48px; flex: 0 0 48px; }
+            #files-grid.list-view .file-card { height: 56px; }
+        }
     </style>
 </head>
 <body class="bg-white text-zinc-900 selection:bg-zinc-100 selection:text-zinc-900">
 
-<div class="app">
+<!-- Mobile backdrop used for sidebar (keeps fullscreen modal separate) -->
+<div id="mobile-backdrop" class="mobile-backdrop" aria-hidden="true"></div>
+
+<div class="app" id="app-root">
     <!-- Sidebar -->
-    <aside class="sidebar">
+    <aside class="sidebar" id="sidebar" role="navigation" aria-label="Боковая навигация">
         <div class="h-14 flex items-center px-4 border-b border-zinc-100/50 bg-transparent">
             <div class="flex items-center gap-2">
                 <div class="w-6 h-6 bg-zinc-900 rounded flex items-center justify-center text-white">
@@ -241,6 +333,10 @@
                 </div>
                 <span class="font-medium text-sm tracking-tight text-zinc-900">Медиабиблиотека</span>
             </div>
+            <!-- mobile close button -->
+            <button id="close-sidebar-btn" class="ml-auto md:hidden text-zinc-500 hover:text-zinc-700" title="Закрыть меню" style="display:none">
+                <i data-lucide="x" class="w-4 h-4"></i>
+            </button>
         </div>
 
         <nav class="p-3 space-y-0.5 flex-1 overflow-y-auto">
@@ -281,9 +377,16 @@
     <!-- Main -->
     <main>
         <header id="page-header" class="h-14 border-b border-zinc-100 flex items-center justify-between px-6 bg-white sticky top-0 z-10">
-            <div class="flex-1 max-w-md relative">
-                <i data-lucide="search" class="absolute left-2.5 top-2.5 w-4 h-4 text-zinc-400"></i>
-                <input id="search-input" type="text" placeholder="Поиск по названию" class="w-full bg-zinc-50 border border-zinc-200 rounded-lg pl-9 pr-4 py-1.5 text-sm placeholder-zinc-400 focus:outline-none focus:border-zinc-300 focus:bg-white transition-all shadow-sm">
+            <div class="flex items-center gap-3">
+                <!-- Hamburger: visible on small devices -->
+                <button id="sidebar-toggle" class="md:hidden p-1.5 rounded-md hover:bg-zinc-50" title="Меню" aria-label="Открыть меню">
+                    <i data-lucide="menu" class="w-5 h-5 text-zinc-700"></i>
+                </button>
+
+                <div class="flex-1 max-w-md relative">
+                    <i data-lucide="search" class="absolute left-2.5 top-2.5 w-4 h-4 text-zinc-400"></i>
+                    <input id="search-input" type="text" placeholder="Поиск по названию" class="w-full bg-zinc-50 border border-zinc-200 rounded-lg pl-9 pr-4 py-1.5 text-sm placeholder-zinc-400 focus:outline-none focus:border-zinc-300 focus:bg-white transition-all shadow-sm" />
+                </div>
             </div>
 
             <div class="flex items-center gap-3 ml-4">
@@ -316,8 +419,8 @@
                     </div>
                 </div>
 
-                <a href="admin" class="flex items-center gap-2 px-3 py-1.5 bg-zinc-900 hover:bg-zinc-800 text-white text-sm font-medium rounded-lg shadow-sm transition-all">
-                    <i data-lucide="upload-cloud" class="w-4 h-4"></i><span>Администрирование</span>
+                <a href="admin" id="admin-btn" class="flex items-center gap-2 px-3 py-1.5 bg-zinc-900 hover:bg-zinc-800 text-white text-sm font-medium rounded-lg shadow-sm transition-all admin-btn" title="Администрирование">
+                    <i data-lucide="upload-cloud" class="w-4 h-4"></i><span class="admin-label">Администрирование</span>
                 </a>
             </div>
         </header>
@@ -339,7 +442,8 @@
                     <div class="aspect-card bg-zinc-100 relative overflow-hidden thumb" style="min-height:0;">
                         <div class="absolute inset-0 flex items-center justify-center bg-zinc-50">
                             {% if file.is_image %}
-                                <img src="{{ file.file.url }}" alt="{{ file.title }}" class="w-full h-full object-cover">
+                                <!-- draggable="false" чтобы предотвратить нативные жесты/перетаскивание -->
+                                <img src="{{ file.file.url }}" alt="{{ file.title }}" class="w-full h-full object-cover" draggable="false">
                             {% else %}
                                 <i data-lucide="{% if file.format == 'PDF' %}file-text{% elif file.format in 'DOC,DOCX' %}file-text{% elif file.format in 'XLS,XLSX' %}table{% elif file.format in 'PPT,PPTX' %}presentation{% elif file.format in 'ZIP,RAR,7Z' %}archive{% elif file.format in 'MP4,AVI' %}video{% elif file.format in 'MP3,WAV' %}music{% else %}file{% endif %}" class="w-8 h-8 text-zinc-300"></i>
                             {% endif %}
@@ -352,14 +456,26 @@
                         </div>
                     </div>
 
-                    <!-- grid meta (used in grid mode) -->
+                    <!-- meta (used in grid and list modes) -->
                     <div class="p-3 meta" style="display:block;">
-                        <div class="flex items-start justify-between gap-2" style="align-items:flex-start;">
-                            <h3 class="text-sm font-medium text-zinc-900 truncate">{{ file.title }}</h3>
+                        <!-- inline row used for list view: title + attrs in one line -->
+                        <div class="info-inline" aria-hidden="false">
+                            <div class="title" title="{{ file.title }}">{{ file.title }}</div>
+                            <div class="attrs" aria-hidden="false">
+                                <div class="attr size" title="{{ file.size_mb }} MB">{{ file.size_mb }} MB</div>
+                                <div class="attr format" title="{{ file.format }}">{{ file.format }}</div>
+                                {% if file.category %}
+                                <div class="attr category" title="{{ file.category.name }}">{{ file.category.name }}</div>
+                                {% else %}
+                                <div class="attr category" title="—">—</div>
+                                {% endif %}
+                            </div>
                         </div>
-                        <p class="text-xs text-zinc-500 mt-0.5">{{ file.size_mb }} MB • {{ file.format }}</p>
+
+                        <!-- grid-only (kept for grid view visual) -->
+                        <p class="text-xs text-zinc-500 mt-0.5 grid-only">{{ file.size_mb }} MB • {{ file.format }}</p>
                         {% if file.category %}
-                        <div class="mt-2 flex items-center gap-1.5">
+                        <div class="mt-2 flex items-center gap-1.5 grid-only">
                             <span class="px-1.5 py-0.5 bg-zinc-50 text-zinc-600 text-[10px] font-medium rounded border border-zinc-100">{{ file.category.name }}</span>
                         </div>
                         {% endif %}
@@ -375,12 +491,12 @@
         </div>
     </main>
 
-    <!-- Details panel (in-flow) -->
-    <aside id="details-panel" class="closed" aria-hidden="true">
-        <div class="panel-inner">
+    <!-- Details panel (in-flow / overlay on small screens) -->
+    <aside id="details-panel" class="closed" aria-hidden="true" aria-labelledby="file-title" role="region">
+        <div class="panel-inner" id="details-inner">
             <div class="panel-header">
                 <span class="text-sm font-medium text-zinc-900">Свойства</span>
-                <button id="close-details-btn" class="text-zinc-400 hover:text-zinc-600"><i data-lucide="x" class="w-4 h-4"></i></button>
+                <button id="close-details-btn" class="text-zinc-400 hover:text-zinc-600" aria-label="Закрыть свойства"><i data-lucide="x" class="w-4 h-4"></i></button>
             </div>
 
             <div class="panel-body">
@@ -429,7 +545,7 @@
 
 <!-- Fullscreen image modal -->
 <div id="fullscreen-modal" class="fullscreen-modal" aria-hidden="true">
-    <button class="fullscreen-close" id="fullscreen-close"><i data-lucide="x" class="w-5 h-5 text-white"></i></button>
+    <button class="fullscreen-close" id="fullscreen-close" title="Закрыть"><i data-lucide="x" class="w-5 h-5 text-white"></i></button>
     <img id="fullscreen-image" src="" alt="">
 </div>
 
@@ -441,6 +557,7 @@
     let selectedFileCard = null;
     let isGridView = true;
     let currentSort = 'date-desc';
+    let mobileSidebarOpen = false;
 
     // helpers
     function isImageFile(format) {
@@ -449,6 +566,7 @@
     function formatDate(dateString){
         if(!dateString) return '—';
         const d = new Date(dateString);
+        if (isNaN(d)) return '—';
         const months = ['янв','фев','мар','апр','май','июн','июл','авг','сен','окт','ноя','дек'];
         return `${d.getDate()} ${months[d.getMonth()]}, ${String(d.getHours()).padStart(2,'0')}:${String(d.getMinutes()).padStart(2,'0')}`;
     }
@@ -458,11 +576,19 @@
     }
 
     // Elements
+    const appRoot = document.getElementById('app-root');
     const filesGrid = document.getElementById('files-grid');
     const detailsPanel = document.getElementById('details-panel');
     const sortDropdown = document.getElementById('sort-dropdown');
     const gridBtn = document.getElementById('grid-view-btn');
     const listBtn = document.getElementById('list-view-btn');
+    const sidebar = document.getElementById('sidebar');
+    const sidebarToggle = document.getElementById('sidebar-toggle');
+    const closeSidebarBtn = document.getElementById('close-sidebar-btn');
+    const mobileBackdrop = document.getElementById('mobile-backdrop');
+    const viewToggleEl = document.getElementById('view-toggle');
+    const searchInput = document.getElementById('search-input');
+    const adminBtn = document.getElementById('admin-btn');
 
     // View toggle visuals: helper
     function setViewButtonsVisuals(isGrid){
@@ -474,8 +600,31 @@
             gridBtn.classList.remove('view-btn--active'); gridBtn.classList.add('view-btn--inactive');
         }
     }
+
     // initialize visuals
     setViewButtonsVisuals(true);
+
+    // Auto-adapt for phones on initial load:
+    (function mobileAutoAdapt(){
+        try {
+            const w = window.innerWidth || document.documentElement.clientWidth;
+            // if very narrow, prefer list view for denser info and hide view toggle
+            if (w <= 640) {
+                isGridView = false;
+                filesGrid.classList.remove('grid-view');
+                filesGrid.classList.add('list-view');
+                setViewButtonsVisuals(false);
+                // hide view toggle visually (also handled by CSS) and force mobile UI states
+                if (viewToggleEl) viewToggleEl.style.display = 'none';
+                // hide admin label (css will handle), shorten search placeholder
+                searchInput.setAttribute('placeholder', 'Поиск');
+            } else {
+                // desktop default
+                if (viewToggleEl) viewToggleEl.style.display = '';
+                searchInput.setAttribute('placeholder', 'Поиск по названию');
+            }
+        } catch(e){}
+    })();
 
     // Toggle grid/list views
     listBtn.addEventListener('click', () => {
@@ -484,6 +633,9 @@
             filesGrid.classList.remove('grid-view');
             filesGrid.classList.add('list-view');
             setViewButtonsVisuals(false);
+        } else {
+            // already list; keep
+            isGridView = false;
         }
     });
     gridBtn.addEventListener('click', () => {
@@ -492,25 +644,79 @@
             filesGrid.classList.remove('list-view');
             filesGrid.classList.add('grid-view');
             setViewButtonsVisuals(true);
+        } else {
+            isGridView = true;
         }
     });
 
     // Panel open/close helpers
     function openDetailsPanel() {
+        // Open details panel as overlay on small screens, BUT do NOT enable the shared mobile backdrop.
         detailsPanel.classList.remove('closed');
         detailsPanel.classList.add('open');
         detailsPanel.setAttribute('aria-hidden','false');
+        // NOTE: intentionally NOT toggling mobileBackdrop nor setting document.body.style.overflow here,
+        // so the screen won't be darkened — fullscreen overlay remains exclusive to image viewer.
     }
     function closeDetailsPanel() {
         detailsPanel.classList.remove('open');
         detailsPanel.classList.add('closed');
         detailsPanel.setAttribute('aria-hidden','true');
+        // NOTE: intentionally NOT touching mobileBackdrop or document.body.style.overflow here.
     }
 
+    // Mobile sidebar toggle
+    function openSidebar() {
+        sidebar.classList.add('open');
+        mobileSidebarOpen = true;
+        // show backdrop for sidebar
+        mobileBackdrop.classList.add('active');
+        mobileBackdrop.setAttribute('aria-hidden','false');
+        // show close button inside sidebar on mobile
+        if (closeSidebarBtn) closeSidebarBtn.style.display = '';
+        // prevent body scroll while sidebar open
+        document.body.style.overflow = 'hidden';
+    }
+    function closeSidebar() {
+        sidebar.classList.remove('open');
+        mobileSidebarOpen = false;
+        mobileBackdrop.classList.remove('active');
+        mobileBackdrop.setAttribute('aria-hidden','true');
+        if (closeSidebarBtn) closeSidebarBtn.style.display = 'none';
+        document.body.style.overflow = '';
+    }
+
+    sidebarToggle.addEventListener('click', (e) => {
+        e.stopPropagation();
+        if (!mobileSidebarOpen) openSidebar(); else closeSidebar();
+    });
+    if (closeSidebarBtn) {
+        closeSidebarBtn.addEventListener('click', (e) => { e.stopPropagation(); closeSidebar(); });
+    }
+
+    // clicking backdrop closes whichever overlay is open (sidebar or details)
+    mobileBackdrop.addEventListener('click', () => {
+        if (mobileSidebarOpen) closeSidebar();
+        // Details panel does not use mobileBackdrop anymore; keep this safe.
+        if (!detailsPanel.classList.contains('closed')) closeDetailsPanel();
+    });
+
     // Delegated click: file-card selection
-    document.getElementById('files-grid').addEventListener('click', (e) => {
+    // NOTE: modified to prevent native mobile image/gesture behaviors that interfered with selection.
+    filesGrid.addEventListener('click', (e) => {
         const card = e.target.closest('.file-card');
         if (!card) return;
+
+        // If the click was inside an interactive control (button/link inside the card), ignore here
+        if (e.target.closest('button, a, input, select, textarea')) return;
+
+        // Prevent default mobile gestures / highlight that produced 'zoom-like' effect
+        if (e.cancelable) e.preventDefault();
+        e.stopPropagation();
+
+        // If mobile and sidebar open, close it to reveal content
+        if (mobileSidebarOpen) closeSidebar();
+
         selectFile(card);
     });
 
@@ -556,17 +762,25 @@
         // update preview - ensure it doesn't change parent size
         const preview = document.getElementById('file-preview');
         if (isImageFile(fileData.format) && fileData.url) {
-            preview.innerHTML = `<img id="preview-image" src="${fileData.url}" alt="${(fileData.title||'')}" />`;
+            // create preview image with explicit id 'preview-image' — only it opens fullscreen
+            preview.innerHTML = `<img id="preview-image" src="${fileData.url}" alt="${(fileData.title||'')}" draggable="false" style="cursor:zoom-in" />`;
+            // re-init icons if any (not necessary for image but in case)
+            lucide.createIcons();
             setTimeout(()=> {
                 const pi = document.getElementById('preview-image');
-                if (pi) pi.addEventListener('click', ()=> openFullscreen(fileData.url, fileData.title));
+                if (pi) {
+                    // remove previous handlers if any, then add click that opens fullscreen
+                    pi.onclick = () => openFullscreen(fileData.url, fileData.title);
+                    // also prevent propagation to avoid the preview click triggering other handlers
+                    pi.addEventListener('click', (ev) => { ev.stopPropagation(); });
+                }
             }, 0);
         } else {
             preview.innerHTML = `<i data-lucide="${getFileIcon(fileData.format)}" class="w-10 h-10 text-zinc-300"></i>`;
             lucide.createIcons();
         }
 
-        // open details panel (in-flow)
+        // open details panel (in-flow or overlay on mobile)
         openDetailsPanel();
     }
 
@@ -623,7 +837,7 @@
         cards.forEach(c => grid.appendChild(c));
         currentSort = type;
     }
-    document.querySelectorAll('[data-sort]').forEach(btn => btn.addEventListener('click', () => {
+    document.querySelectorAll('[data-sort]').forEach(btn => btn.addEventListener('click', (ev) => {
         sortFiles(btn.dataset.sort);
         sortDropdown.classList.remove('active');
     }));
@@ -648,6 +862,7 @@
         img.alt = title||'';
         modal.classList.add('active');
         modal.setAttribute('aria-hidden','false');
+        // block background scroll when fullscreen is active
         document.body.style.overflow = 'hidden';
     }
     function closeFullscreen(){
@@ -658,11 +873,110 @@
         document.getElementById('fullscreen-image').src = '';
     }
     document.getElementById('fullscreen-close').addEventListener('click', closeFullscreen);
-    document.addEventListener('keydown', (e) => { if (e.key === 'Escape') { closeFullscreen(); closeDetailsPanel(); } });
+    document.addEventListener('keydown', (e) => { if (e.key === 'Escape') { closeFullscreen(); closeDetailsPanel(); if (mobileSidebarOpen) closeSidebar(); } });
     document.getElementById('fullscreen-modal').addEventListener('click', (e) => { if (e.target.id === 'fullscreen-modal') closeFullscreen(); });
+
+    // Swipe-to-close for details panel on mobile (simple horizontal swipe detection)
+    (function setupSwipeClose(){
+        let startX = 0, currentX = 0, tracking = false;
+        const threshold = 60; // px to trigger close
+        const details = document.getElementById('details-panel');
+        details.addEventListener('touchstart', (ev) => {
+            if (window.innerWidth > 900) return;
+            if (ev.touches && ev.touches.length === 1) {
+                startX = ev.touches[0].clientX;
+                tracking = true;
+            }
+        }, {passive: true});
+        details.addEventListener('touchmove', (ev) => {
+            if (!tracking) return;
+            currentX = ev.touches[0].clientX;
+            const deltaX = currentX - startX;
+            // only support swipe right to close
+            if (deltaX > 0) {
+                details.style.transform = `translateX(${deltaX}px)`;
+            }
+        }, {passive: true});
+        details.addEventListener('touchend', (ev) => {
+            if (!tracking) return;
+            tracking = false;
+            const deltaX = currentX - startX;
+            details.style.transform = '';
+            if (deltaX > threshold) {
+                closeDetailsPanel();
+            }
+            startX = currentX = 0;
+        });
+    })();
+
+    // close overlays on orientation change/resizes that cross the 900px threshold to restore desktop layout
+    let lastWidth = window.innerWidth;
+    window.addEventListener('resize', () => {
+        const w = window.innerWidth;
+        // if crossing to desktop width, ensure mobile overlay states are cleared
+        if (lastWidth <= 900 && w > 900) {
+            // clear mobile backdrop, close sidebar if open
+            if (mobileSidebarOpen) closeSidebar();
+            mobileBackdrop.classList.remove('active');
+            mobileBackdrop.setAttribute('aria-hidden','true');
+            document.body.style.overflow = '';
+            // restore view toggle normally
+            if (viewToggleEl) viewToggleEl.style.display = '';
+            // reset placeholder
+            searchInput.setAttribute('placeholder', 'Поиск по названию');
+        }
+
+        // when shrinking to <=640 ensure list view, hide view-toggle and shorten placeholder
+        if (lastWidth > 640 && w <= 640) {
+            isGridView = false;
+            filesGrid.classList.remove('grid-view');
+            filesGrid.classList.add('list-view');
+            setViewButtonsVisuals(false);
+            if (viewToggleEl) viewToggleEl.style.display = 'none';
+            searchInput.setAttribute('placeholder', 'Поиск');
+        }
+
+        // if expanding from <=640 to >640 show view-toggle and restore placeholder
+        if (lastWidth <= 640 && w > 640) {
+            if (viewToggleEl) viewToggleEl.style.display = '';
+            searchInput.setAttribute('placeholder', 'Поиск по названию');
+        }
+
+        lastWidth = w;
+    });
+
+    // Ensure on load admin button label hidden on phone widths (CSS also handles)
+    (function adjustAdminLabelOnLoad(){
+        try {
+            if (window.innerWidth <= 640) {
+                // ensure admin label hidden (CSS covers, but keep accessible)
+                const label = adminBtn.querySelector('.admin-label');
+                if (label) label.style.display = 'none';
+            }
+        } catch(e){}
+    })();
+
+    // accessibility: focus trap for sidebar (simple)
+    document.addEventListener('keydown', (e) => {
+        if (e.key === 'Tab') {
+            // if sidebar open on mobile, keep focus inside it
+            if (mobileSidebarOpen && window.innerWidth <= 900) {
+                const focusables = Array.from(sidebar.querySelectorAll('a,button,input,select,textarea,[tabindex]:not([tabindex="-1"])')).filter(el => !el.disabled);
+                if (focusables.length === 0) return;
+                const first = focusables[0], last = focusables[focusables.length-1];
+                if (e.shiftKey && document.activeElement === first) {
+                    e.preventDefault(); last.focus();
+                } else if (!e.shiftKey && document.activeElement === last) {
+                    e.preventDefault(); first.focus();
+                }
+            }
+        }
+    });
 
     // initialize lucide icons again for dynamic inserts
     lucide.createIcons();
+
+    // All core original logic preserved; changed details panel behavior to NOT use mobileBackdrop and NOT block the page with dark overlay.
 </script>
 </body>
 </html>
