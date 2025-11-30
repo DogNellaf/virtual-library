@@ -1,89 +1,671 @@
 <!DOCTYPE html>
 <html lang="ru">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Виртуальная библиотека</title>
+    <meta charset="utf-8"/>
+    <meta name="viewport" content="width=device-width,initial-scale=1"/>
+    <title>Digital Library Catalog</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet">
     <style>
-        body {
-            font-family: Arial, sans-serif;
-            margin: 0;
-            padding: 0;
-            background-color: #f4f4f4;
-        }
-        .header {
-            background-color: #2c3e50;
-            color: white;
-            padding: 1rem;
-            text-align: center;
-        }
-        .nav {
-            background-color: #34495e;
-            padding: 0.5rem;
-        }
-        .nav a {
-            color: white;
-            text-decoration: none;
-            padding: 0.5rem 1rem;
-            display: inline-block;
-        }
-        .container {
-            max-width: 1200px;
-            margin: 0 auto;
-            padding: 1rem;
-        }
-        .category-list {
+        :root { --panel-width: 288px; --preview-height: 200px; }
+
+        body { font-family: 'Inter', sans-serif; margin:0; }
+        ::-webkit-scrollbar { width: 6px; height: 6px; }
+        ::-webkit-scrollbar-track { background: transparent; }
+        ::-webkit-scrollbar-thumb { background-color: #e4e4e7; border-radius: 3px; }
+        ::-webkit-scrollbar-thumb:hover { background-color: #d4d4d8; }
+
+        /* App layout: sidebar + main + details in single row */
+        .app {
             display: flex;
-            flex-wrap: wrap;
-            gap: 1rem;
-            margin: 1rem 0;
-        }
-        .category-card {
-            background: white;
-            border-radius: 5px;
-            padding: 1rem;
-            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
-            flex: 1 1 300px;
-        }
-        .image-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
-            gap: 1rem;
-            margin: 1rem 0;
-        }
-        .image-card {
-            background: white;
-            border-radius: 5px;
-            overflow: hidden;
-            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
-        }
-        .image-card img {
+            min-height: 100vh;
             width: 100%;
-            height: 200px;
-            object-fit: cover;
+            box-sizing: border-box;
+            align-items: stretch;
+            overflow: hidden;
         }
-        .image-info {
-            padding: 1rem;
+
+        /* Sidebar */
+        .sidebar {
+            width: 16rem; /* 256px */
+            flex: 0 0 16rem;
+            border-right: 1px solid #e6e6e6;
+            display: flex;
+            flex-direction: column;
+            background: rgba(249,250,251,0.3);
+            box-sizing: border-box;
         }
-        .filter-form {
-            margin: 1rem 0;
+
+        /* Main area */
+        main {
+            flex: 1 1 auto;
+            display: flex;
+            flex-direction: column;
+            min-width: 0;
+            background: #fff;
+            box-sizing: border-box;
+            overflow: hidden;
+        }
+
+        /* Header */
+        header#page-header {
+            height: 56px;
+            flex: 0 0 56px;
+            box-sizing: border-box;
+        }
+
+        /* Content scroll area */
+        .content-scroll {
+            flex: 1 1 auto;
+            overflow-y: auto;
+        }
+
+        /* Общие карточки */
+        .aspect-card { aspect-ratio: 4/3; }
+        .file-card { background: #fff; border: 1px solid #e4e4e7; border-radius: .75rem; overflow: hidden; position: relative; box-sizing: border-box; transition: box-shadow .18s ease, transform .12s ease; cursor: pointer; }
+        .file-card:hover { box-shadow: 0 6px 20px rgba(15,23,42,.06); transform: translateY(-1px); }
+
+        /* Grid: responsive */
+        #files-grid.grid-view { display: grid; gap: 1rem; grid-template-columns: repeat(2, minmax(0,1fr)); }
+        @media(min-width:768px){ #files-grid.grid-view{ grid-template-columns: repeat(3, minmax(0,1fr)); } }
+        @media(min-width:1024px){ #files-grid.grid-view{ grid-template-columns: repeat(4, minmax(0,1fr)); } }
+        @media(min-width:1280px){ #files-grid.grid-view{ grid-template-columns: repeat(5, minmax(0,1fr)); } }
+
+        /* LIST VIEW: фиксированная высота, фиксированные колонки, трёнкат */
+        #files-grid.list-view { display: flex; flex-direction: column; gap: 0.25rem; }
+        #files-grid.list-view .file-card { display: flex; align-items: center; height: 72px; padding: 0; border-radius: 0; border-left: none; border-right: none; border-top: none; box-sizing: border-box; }
+        #files-grid.list-view .file-card:first-child { border-top: 1px solid #e4e4e7; border-top-left-radius: .75rem; border-top-right-radius: .75rem; }
+        #files-grid.list-view .file-card:last-child { border-bottom-left-radius: .75rem; border-bottom-right-radius: .75rem; }
+
+        /* Thumb (левая колонка в list) */
+        #files-grid.list-view .thumb { width: 72px; height: 72px; flex: 0 0 72px; display:flex; align-items:center; justify-content:center; background:#f7f7f8; border-right:1px solid #f1f1f2; box-sizing:border-box; }
+        #files-grid.list-view .thumb img { width:100%; height:100%; object-fit:cover; display:block; }
+
+        /* meta (центр) */
+        #files-grid.list-view .meta { flex:1 1 auto; min-width:0; padding:0 12px; display:flex; align-items:center; gap:12px; }
+        #files-grid.list-view .meta .title { flex:1 1 auto; min-width:0; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; font-size:.9375rem; font-weight:500; color:#111827; }
+        #files-grid.list-view .meta .sub { flex:0 0 auto; white-space:nowrap; color:#6b7280; font-size:12px; }
+
+        /* actions (право) */
+        #files-grid.list-view .actions { flex:0 0 120px; display:flex; justify-content:flex-end; align-items:center; padding:0 12px; gap:8px; color:#6b7280; font-size:12px; box-sizing:border-box; }
+
+        /* Indicator (check) — визуально, не влияет на layout */
+        .file-selected-indicator { position:absolute; left:10px; top:10px; pointer-events:none; z-index:10; }
+
+        /* DETAILS PANEL: always in DOM; closed -> width:0; open -> var(--panel-width) */
+        #details-panel {
+            flex: 0 0 var(--panel-width);
+            width: var(--panel-width);
+            max-width: 38%;
+            box-sizing: border-box;
+            background: #fff;
+            border-left: 1px solid #e6e6e6;
+            box-shadow: -12px 0 30px rgba(2,6,23,.06);
+            overflow: hidden;
+            transition: width 220ms ease, flex-basis 220ms ease, opacity 180ms ease;
+            opacity: 1;
+            visibility: visible;
+            display: flex;
+            flex-direction: column;
+        }
+        /* closed: shrink to 0 but stay in layout row */
+        #details-panel.closed {
+            width: 0 !important;
+            flex: 0 0 0 !important;
+            opacity: 0;
+            visibility: hidden;
+            pointer-events: none;
+        }
+        /* open state */
+        #details-panel.open {
+            width: var(--panel-width);
+            flex: 0 0 var(--panel-width);
+            opacity: 1;
+            visibility: visible;
+            pointer-events: auto;
+        }
+
+        /* panel internal layout */
+        #details-panel .panel-inner {
+            display: flex;
+            flex-direction: column;
+            height: 100vh;
+            box-sizing: border-box;
+        }
+        #details-panel .panel-header {
+            flex: 0 0 56px;
+            display:flex;
+            align-items:center;
+            justify-content:space-between;
+            padding: 0 1rem;
+            border-bottom: 1px solid #eef2f6;
+            box-sizing: border-box;
+            height:56px;
+        }
+        #details-panel .panel-body {
+            flex: 1 1 auto;
+            overflow: auto;
+            padding: 1.25rem;
+            box-sizing: border-box;
+        }
+        #details-panel .panel-footer {
+            flex: 0 0 auto;
             padding: 1rem;
-            background: white;
-            border-radius: 5px;
+            border-top: 1px solid #eef2f6;
+            box-sizing: border-box;
+            background: rgba(249,250,251,0.6);
+        }
+
+        /* PREVIEW: fixed size (was variable before). This block now ALWAYS same height (doesn't grow with image). */
+        #file-preview {
+            width: 100%;
+            height: var(--preview-height); /* fixed */
+            min-height: var(--preview-height);
+            max-height: var(--preview-height);
+            position: relative;
+            border-radius: .5rem;
+            overflow: hidden;
+            background: #f3f4f6;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        /* Image inside preview: must fit, not change parent size */
+        #file-preview img {
+            max-width: 100%;
+            max-height: 100%;
+            width: auto;
+            height: auto;
+            object-fit: contain;
+            display: block;
+        }
+        #file-preview i {
+            width: 48px;
+            height: 48px;
+        }
+
+        /* description should NOT push layout: limit height and allow internal scroll */
+        #file-description {
+            max-height: calc(100vh - 420px);
+            overflow: auto;
+            word-break: break-word;
+        }
+
+        /* fullscreen modal */
+        .fullscreen-modal { position:fixed; inset:0; background:rgba(0,0,0,.95); z-index:9999; display:none; align-items:center; justify-content:center; padding:2rem; }
+        .fullscreen-modal.active { display:flex; }
+        .fullscreen-modal img { max-width:100%; max-height:100%; object-fit:contain; border-radius:.5rem; }
+
+        /* dropdown */
+        .sort-dropdown { position:absolute; top:100%; right:0; margin-top:.5rem; min-width:200px; display:none; z-index:50; }
+        .sort-dropdown.active { display:block; }
+
+        /* view button states */
+        .view-btn--active { background: white !important; box-shadow: 0 1px 2px rgba(0,0,0,.06); color: #111827 !important; border-radius:.5rem; }
+        .view-btn--inactive { color: #9ca3af !important; background: transparent !important; box-shadow: none !important; }
+
+        /* not to change layout when selected */
+        .file-card.is-selected { box-shadow: 0 0 0 3px rgba(59,130,246,.18), 0 6px 24px rgba(15,23,42,.08); }
+
+        /* Responsive: small screens -> details panel becomes overlay fixed */
+        @media (max-width: 900px) {
+            .app { align-items: stretch; }
+            #details-panel {
+                position: fixed;
+                right: 0;
+                top: 0;
+                height: 100vh;
+                width: 100%;
+                max-width: 100%;
+                z-index: 1200;
+                transition: transform 220ms ease, opacity 180ms ease;
+            }
+            #details-panel.closed { transform: translateX(100%); width: 100%; flex: 0 0 100%; visibility: hidden; }
+            #details-panel.open { transform: translateX(0); visibility: visible; }
+            /* decrease preview height on small screens */
+            :root { --preview-height: 160px; }
         }
     </style>
 </head>
-<body>
-    <div class="header">
-        <h1>Виртуальная библиотека</h1>
-    </div>
-    <div class="nav">
-        <a href="{% url 'index' %}">Главная</a>
-        <a href="{% url 'image_list' %}">Все изображения</a>
-    </div>
-    <div class="container">
-        {% block content %}
-        {% endblock %}
-    </div>
+<body class="bg-white text-zinc-900 selection:bg-zinc-100 selection:text-zinc-900">
+
+<div class="app">
+    <!-- Sidebar -->
+    <aside class="sidebar">
+        <div class="h-14 flex items-center px-4 border-b border-zinc-100/50 bg-transparent">
+            <div class="flex items-center gap-2">
+                <div class="w-6 h-6 bg-zinc-900 rounded flex items-center justify-center text-white">
+                    <i data-lucide="library" class="w-3.5 h-3.5"></i>
+                </div>
+                <span class="font-medium text-sm tracking-tight text-zinc-900">Медиабиблиотека</span>
+            </div>
+        </div>
+
+        <nav class="p-3 space-y-0.5 flex-1 overflow-y-auto">
+            <a href="{% url 'index' %}" class="px-2 py-1.5 rounded-md flex items-center justify-between group cursor-pointer transition-colors {% if not selected_category_id %} bg-white border border-zinc-200/60 shadow-sm text-zinc-900 {% else %} text-zinc-600 hover:bg-zinc-100/50 hover:text-zinc-900 {% endif %}">
+                <div class="flex items-center gap-2.5">
+                    <i data-lucide="layout-grid" class="w-4 h-4 text-zinc-500"></i>
+                    <span class="text-sm font-medium">Все файлы</span>
+                </div>
+                <span class="text-xs text-zinc-400">{{ total_files_count }}</span>
+            </a>
+
+            <div class="h-4"></div>
+
+            <div class="px-2 mb-1.5 flex items-center justify-between">
+                <span class="text-xs font-medium text-zinc-400 uppercase tracking-wider">Категории</span>
+                <button class="text-zinc-400 hover:text-zinc-600 transition-colors" id="add-category-btn">
+                    <i data-lucide="plus" class="w-3.5 h-3.5"></i>
+                </button>
+            </div>
+
+            {% for category in categories %}
+            <a href="{% url 'category' category.id %}" class="flex items-center gap-2.5 px-2 py-1.5 rounded-md transition-colors {% if selected_category_id and category.id == selected_category_id %} bg-white border border-zinc-200/60 shadow-sm text-zinc-900 {% else %} text-zinc-600 hover:bg-zinc-100/50 hover:text-zinc-900 {% endif %}">
+                <i data-lucide="folder" class="w-4 h-4 {% if selected_category_id and category.id == selected_category_id %}text-zinc-500{% else %}text-zinc-400{% endif %}"></i>
+                <span class="text-sm">{{ category.name }}</span>
+                <span class="text-xs text-zinc-400 ml-auto">{{ category.files_count }}</span>
+            </a>
+            {% endfor %}
+        </nav>
+
+        <div class="p-4 border-t border-zinc-100 bg-white">
+            <div class="flex justify-between items-end mb-1.5">
+                <span class="text-xs font-medium text-zinc-500">Хранилище</span>
+                <span class="text-[10px] text-zinc-400" id="storage-text">{{ storage_used|floatformat:1 }} GB / {{ storage_total_gb }} GB</span>
+            </div>
+            <div class="w-full bg-zinc-100 rounded-full h-1.5 overflow-hidden">
+                <div class="bg-zinc-800 h-1.5 rounded-full transition-all duration-300" id="storage-bar" style="width: {{ storage_percent }}%"></div>
+            </div>
+        </div>
+    </aside>
+
+    <!-- Main -->
+    <main>
+        <header id="page-header" class="h-14 border-b border-zinc-100 flex items-center justify-between px-6 bg-white sticky top-0 z-10">
+            <div class="flex-1 max-w-md relative">
+                <i data-lucide="search" class="absolute left-2.5 top-2.5 w-4 h-4 text-zinc-400"></i>
+                <input id="search-input" type="text" placeholder="Поиск по названию" class="w-full bg-zinc-50 border border-zinc-200 rounded-lg pl-9 pr-4 py-1.5 text-sm placeholder-zinc-400 focus:outline-none focus:border-zinc-300 focus:bg-white transition-all shadow-sm">
+            </div>
+
+            <div class="flex items-center gap-3 ml-4">
+                <div id="view-toggle" class="flex items-center bg-zinc-50 rounded-lg p-0.5 border border-zinc-200">
+                    <button id="grid-view-btn" class="p-1.5 view-btn view-btn--active" title="Плитка"><i data-lucide="layout-grid" class="w-4 h-4"></i></button>
+                    <button id="list-view-btn" class="p-1.5 view-btn view-btn--inactive" title="Список"><i data-lucide="list" class="w-4 h-4"></i></button>
+                </div>
+
+                <div class="h-4 w-px bg-zinc-200"></div>
+
+                <div class="relative">
+                    <button id="sort-btn" class="flex items-center gap-2 px-3 py-1.5 text-sm font-medium text-zinc-600 hover:text-zinc-900 hover:bg-zinc-50 rounded-lg transition-colors">
+                        <i data-lucide="arrow-up-down" class="w-4 h-4"></i>
+                        <span class="hidden sm:inline">Сортировка</span>
+                    </button>
+                    <div id="sort-dropdown" class="sort-dropdown bg-white border border-zinc-200 rounded-lg shadow-lg overflow-hidden">
+                        <button data-sort="name-asc" class="w-full px-4 py-2 text-left text-sm text-zinc-700 hover:bg-zinc-50 transition-colors flex items-center justify-between">
+                            <span>Имя (А-Я)</span><i data-lucide="arrow-up" class="w-3.5 h-3.5 text-zinc-400"></i>
+                        </button>
+                        <button data-sort="name-desc" class="w-full px-4 py-2 text-left text-sm text-zinc-700 hover:bg-zinc-50 transition-colors flex items-center justify-between">
+                            <span>Имя (Я-А)</span><i data-lucide="arrow-down" class="w-3.5 h-3.5 text-zinc-400"></i>
+                        </button>
+                        <div class="h-px bg-zinc-100"></div>
+                        <button data-sort="date-desc" class="w-full px-4 py-2 text-left text-sm text-zinc-700 hover:bg-zinc-50 transition-colors flex items-center justify-between">
+                            <span>Дата (новые)</span><i data-lucide="calendar" class="w-3.5 h-3.5 text-zinc-400"></i>
+                        </button>
+                        <button data-sort="date-asc" class="w-full px-4 py-2 text-left text-sm text-zinc-700 hover:bg-zinc-50 transition-colors flex items-center justify-between">
+                            <span>Дата (старые)</span><i data-lucide="calendar" class="w-3.5 h-3.5 text-zinc-400"></i>
+                        </button>
+                    </div>
+                </div>
+
+                <a href="admin" class="flex items-center gap-2 px-3 py-1.5 bg-zinc-900 hover:bg-zinc-800 text-white text-sm font-medium rounded-lg shadow-sm transition-all">
+                    <i data-lucide="upload-cloud" class="w-4 h-4"></i><span>Администрирование</span>
+                </a>
+            </div>
+        </header>
+
+        <div class="content-scroll p-6">
+            <div id="files-grid" class="grid-view">
+                {% for file in files %}
+                <div class="file-card group relative" 
+                     data-file-id="{{ file.id }}"
+                     data-file-title="{{ file.title }}"
+                     data-file-size="{{ file.size_mb }}"
+                     data-file-format="{{ file.format }}"
+                     data-file-type="{{ file.file_type }}"
+                     data-file-category="{{ file.category.name|default:'Без категории' }}"
+                     data-file-date="{{ file.upload_date|date:'c' }}"
+                     data-file-description="{{ file.description|default:'' }}"
+                     data-file-url="{{ file.file.url }}">
+                    <!-- Grid preview (kept for grid): aspect-card -->
+                    <div class="aspect-card bg-zinc-100 relative overflow-hidden thumb" style="min-height:0;">
+                        <div class="absolute inset-0 flex items-center justify-center bg-zinc-50">
+                            {% if file.is_image %}
+                                <img src="{{ file.file.url }}" alt="{{ file.title }}" class="w-full h-full object-cover">
+                            {% else %}
+                                <i data-lucide="{% if file.format == 'PDF' %}file-text{% elif file.format in 'DOC,DOCX' %}file-text{% elif file.format in 'XLS,XLSX' %}table{% elif file.format in 'PPT,PPTX' %}presentation{% elif file.format in 'ZIP,RAR,7Z' %}archive{% elif file.format in 'MP4,AVI' %}video{% elif file.format in 'MP3,WAV' %}music{% else %}file{% endif %}" class="w-8 h-8 text-zinc-300"></i>
+                            {% endif %}
+                        </div>
+                        <div class="absolute inset-0 bg-black/0 group-hover:bg-black/5 transition-colors"></div>
+                        <div class="absolute top-2 right-2 opacity-0 group-hover:opacity-100 transition-opacity">
+                             <button class="file-menu-btn bg-white p-1.5 rounded-md shadow-sm border border-zinc-200 hover:text-zinc-900 text-zinc-500" onclick="event.stopPropagation()">
+                                <i data-lucide="more-horizontal" class="w-4 h-4"></i>
+                             </button>
+                        </div>
+                    </div>
+
+                    <!-- grid meta (used in grid mode) -->
+                    <div class="p-3 meta" style="display:block;">
+                        <div class="flex items-start justify-between gap-2" style="align-items:flex-start;">
+                            <h3 class="text-sm font-medium text-zinc-900 truncate">{{ file.title }}</h3>
+                        </div>
+                        <p class="text-xs text-zinc-500 mt-0.5">{{ file.size_mb }} MB • {{ file.format }}</p>
+                        {% if file.category %}
+                        <div class="mt-2 flex items-center gap-1.5">
+                            <span class="px-1.5 py-0.5 bg-zinc-50 text-zinc-600 text-[10px] font-medium rounded border border-zinc-100">{{ file.category.name }}</span>
+                        </div>
+                        {% endif %}
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
+
+            <div id="no-results" class="hidden text-center py-12">
+                <i data-lucide="search-x" class="w-12 h-12 text-zinc-300 mx-auto mb-3"></i>
+                <p class="text-zinc-500 text-sm">Файлы не найдены</p>
+            </div>
+        </div>
+    </main>
+
+    <!-- Details panel (in-flow) -->
+    <aside id="details-panel" class="closed" aria-hidden="true">
+        <div class="panel-inner">
+            <div class="panel-header">
+                <span class="text-sm font-medium text-zinc-900">Свойства</span>
+                <button id="close-details-btn" class="text-zinc-400 hover:text-zinc-600"><i data-lucide="x" class="w-4 h-4"></i></button>
+            </div>
+
+            <div class="panel-body">
+                <!-- FIXED preview block: always the same size -->
+                <div id="file-preview" class="rounded-lg border border-zinc-200 mb-4">
+                     <i data-lucide="image" class="w-10 h-10 text-zinc-300"></i>
+                </div>
+
+                <div class="mb-6">
+                    <h2 id="file-title" class="text-base font-medium text-zinc-900 mb-1">Выберите файл</h2>
+                    <p id="file-date" class="text-xs text-zinc-500">—</p>
+                </div>
+
+                <div class="space-y-4">
+                    <div>
+                        <h3 class="text-xs font-medium text-zinc-400 uppercase tracking-wider mb-2">Информация</h3>
+                        <div class="grid grid-cols-2 gap-y-2 text-xs">
+                            <div class="text-zinc-500">Размер</div>
+                            <div id="file-size" class="text-zinc-900 text-right">—</div>
+
+                            <div class="text-zinc-500">Тип</div>
+                            <div id="file-type" class="text-zinc-900 text-right">—</div>
+
+                            <div class="text-zinc-500">Категория</div>
+                            <div id="file-category" class="text-zinc-900 text-right">—</div>
+                        </div>
+                    </div>
+
+                    <div class="h-px bg-zinc-100"></div>
+
+                    <div>
+                        <h3 class="text-xs font-medium text-zinc-400 uppercase tracking-wider mb-2">Описание</h3>
+                        <p id="file-description" class="w-full bg-white border border-zinc-200 rounded-lg p-2 text-xs text-zinc-900 min-h-20">—</p>
+                     </div>
+                </div>
+            </div>
+
+            <div class="panel-footer">
+                <div class="flex gap-2">
+                    <button id="download-btn" class="flex-1 py-2 px-3 bg-white border border-zinc-200 text-zinc-700 text-xs font-medium rounded-lg hover:bg-zinc-50 hover:text-zinc-900 transition-colors shadow-sm">Скачать</button>
+                </div>
+            </div>
+        </div>
+    </aside>
+</div>
+
+<!-- Fullscreen image modal -->
+<div id="fullscreen-modal" class="fullscreen-modal" aria-hidden="true">
+    <button class="fullscreen-close" id="fullscreen-close"><i data-lucide="x" class="w-5 h-5 text-white"></i></button>
+    <img id="fullscreen-image" src="" alt="">
+</div>
+
+<script>
+    // init icons
+    lucide.createIcons();
+
+    // state
+    let selectedFileCard = null;
+    let isGridView = true;
+    let currentSort = 'date-desc';
+
+    // helpers
+    function isImageFile(format) {
+        return ['JPG','JPEG','PNG','GIF','BMP','WEBP','SVG'].includes((format||'').toUpperCase());
+    }
+    function formatDate(dateString){
+        if(!dateString) return '—';
+        const d = new Date(dateString);
+        const months = ['янв','фев','мар','апр','май','июн','июл','авг','сен','окт','ноя','дек'];
+        return `${d.getDate()} ${months[d.getMonth()]}, ${String(d.getHours()).padStart(2,'0')}:${String(d.getMinutes()).padStart(2,'0')}`;
+    }
+    function getFileIcon(format){
+        const map = {'PDF':'file-text','DOC':'file-text','DOCX':'file-text','XLS':'table','XLSX':'table','MP4':'video','MP3':'music'};
+        return map[(format||'').toUpperCase()] || 'file';
+    }
+
+    // Elements
+    const filesGrid = document.getElementById('files-grid');
+    const detailsPanel = document.getElementById('details-panel');
+    const sortDropdown = document.getElementById('sort-dropdown');
+    const gridBtn = document.getElementById('grid-view-btn');
+    const listBtn = document.getElementById('list-view-btn');
+
+    // View toggle visuals: helper
+    function setViewButtonsVisuals(isGrid){
+        if(isGrid){
+            gridBtn.classList.add('view-btn--active'); gridBtn.classList.remove('view-btn--inactive');
+            listBtn.classList.remove('view-btn--active'); listBtn.classList.add('view-btn--inactive');
+        } else {
+            listBtn.classList.add('view-btn--active'); listBtn.classList.remove('view-btn--inactive');
+            gridBtn.classList.remove('view-btn--active'); gridBtn.classList.add('view-btn--inactive');
+        }
+    }
+    // initialize visuals
+    setViewButtonsVisuals(true);
+
+    // Toggle grid/list views
+    listBtn.addEventListener('click', () => {
+        if (isGridView) {
+            isGridView = false;
+            filesGrid.classList.remove('grid-view');
+            filesGrid.classList.add('list-view');
+            setViewButtonsVisuals(false);
+        }
+    });
+    gridBtn.addEventListener('click', () => {
+        if (!isGridView) {
+            isGridView = true;
+            filesGrid.classList.remove('list-view');
+            filesGrid.classList.add('grid-view');
+            setViewButtonsVisuals(true);
+        }
+    });
+
+    // Panel open/close helpers
+    function openDetailsPanel() {
+        detailsPanel.classList.remove('closed');
+        detailsPanel.classList.add('open');
+        detailsPanel.setAttribute('aria-hidden','false');
+    }
+    function closeDetailsPanel() {
+        detailsPanel.classList.remove('open');
+        detailsPanel.classList.add('closed');
+        detailsPanel.setAttribute('aria-hidden','true');
+    }
+
+    // Delegated click: file-card selection
+    document.getElementById('files-grid').addEventListener('click', (e) => {
+        const card = e.target.closest('.file-card');
+        if (!card) return;
+        selectFile(card);
+    });
+
+    function selectFile(card) {
+        // clear previous
+        if (selectedFileCard && selectedFileCard !== card) {
+            selectedFileCard.classList.remove('is-selected');
+            const prevInd = selectedFileCard.querySelector('.file-selected-indicator');
+            if (prevInd) prevInd.remove();
+        }
+
+        selectedFileCard = card;
+        card.classList.add('is-selected');
+
+        // add indicator if not present
+        if (!card.querySelector('.file-selected-indicator')) {
+            const ind = document.createElement('div');
+            ind.className = 'file-selected-indicator';
+            ind.innerHTML = `<div style="width:20px;height:20px;background:#2563eb;border-radius:4px;display:flex;align-items:center;justify-content:center;color:#fff;font-size:12px;"><i data-lucide="check" class="w-3 h-3"></i></div>`;
+            card.appendChild(ind);
+            lucide.createIcons();
+        }
+
+        const fileData = {
+            title: card.dataset.fileTitle,
+            date: card.dataset.fileDate,
+            size: card.dataset.fileSize,
+            format: card.dataset.fileFormat,
+            type: card.dataset.fileType,
+            category: card.dataset.fileCategory,
+            description: card.dataset.fileDescription,
+            url: card.dataset.fileUrl
+        };
+
+        // fill details
+        document.getElementById('file-title').textContent = fileData.title || '—';
+        document.getElementById('file-date').textContent = fileData.date ? 'Добавлено ' + formatDate(fileData.date) : '—';
+        document.getElementById('file-size').textContent = fileData.size ? fileData.size + ' MB' : '—';
+        document.getElementById('file-type').textContent = fileData.type || (fileData.format ? `application/${fileData.format.toLowerCase()}` : '—');
+        document.getElementById('file-category').textContent = fileData.category || '—';
+        document.getElementById('file-description').textContent = fileData.description || 'Нет описания';
+
+        // update preview - ensure it doesn't change parent size
+        const preview = document.getElementById('file-preview');
+        if (isImageFile(fileData.format) && fileData.url) {
+            preview.innerHTML = `<img id="preview-image" src="${fileData.url}" alt="${(fileData.title||'')}" />`;
+            setTimeout(()=> {
+                const pi = document.getElementById('preview-image');
+                if (pi) pi.addEventListener('click', ()=> openFullscreen(fileData.url, fileData.title));
+            }, 0);
+        } else {
+            preview.innerHTML = `<i data-lucide="${getFileIcon(fileData.format)}" class="w-10 h-10 text-zinc-300"></i>`;
+            lucide.createIcons();
+        }
+
+        // open details panel (in-flow)
+        openDetailsPanel();
+    }
+
+    // Close details
+    document.getElementById('close-details-btn').addEventListener('click', () => {
+        closeDetailsPanel();
+        if (selectedFileCard) {
+            selectedFileCard.classList.remove('is-selected');
+            const ind = selectedFileCard.querySelector('.file-selected-indicator');
+            if (ind) ind.remove();
+            selectedFileCard = null;
+        }
+    });
+
+    // Download
+    document.getElementById('download-btn').addEventListener('click', () => {
+        if (!selectedFileCard) return;
+        const url = selectedFileCard.dataset.fileUrl;
+        const name = selectedFileCard.dataset.fileTitle || 'file';
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = name;
+        document.body.appendChild(a);
+        a.click();
+        a.remove();
+    });
+
+    // Sort dropdown toggle & outside click
+    document.getElementById('sort-btn').addEventListener('click', (e) => {
+        e.stopPropagation();
+        sortDropdown.classList.toggle('active');
+    });
+    document.addEventListener('click', (e) => {
+        if (!e.target.closest('#sort-btn') && !e.target.closest('#sort-dropdown')) {
+            sortDropdown.classList.remove('active');
+        }
+    });
+
+    // Sorting implementation
+    function sortFiles(type) {
+        const grid = document.getElementById('files-grid');
+        const cards = Array.from(grid.querySelectorAll('.file-card'));
+        cards.sort((a,b) => {
+            switch(type){
+                case 'name-asc': return a.dataset.fileTitle.localeCompare(b.dataset.fileTitle,'ru');
+                case 'name-desc': return b.dataset.fileTitle.localeCompare(a.dataset.fileTitle,'ru');
+                case 'date-asc': return new Date(a.dataset.fileDate) - new Date(b.dataset.fileDate);
+                case 'date-desc': return new Date(b.dataset.fileDate) - new Date(a.dataset.fileDate);
+                case 'size-asc': return parseFloat(a.dataset.fileSize) - parseFloat(b.dataset.fileSize);
+                case 'size-desc': return parseFloat(b.dataset.fileSize) - parseFloat(a.dataset.fileSize);
+                default: return 0;
+            }
+        });
+        cards.forEach(c => grid.appendChild(c));
+        currentSort = type;
+    }
+    document.querySelectorAll('[data-sort]').forEach(btn => btn.addEventListener('click', () => {
+        sortFiles(btn.dataset.sort);
+        sortDropdown.classList.remove('active');
+    }));
+
+    // Search
+    document.getElementById('search-input').addEventListener('input', (e) => {
+        const q = e.target.value.toLowerCase().trim();
+        const cards = document.querySelectorAll('.file-card');
+        let visible = 0;
+        cards.forEach(card => {
+            const title = (card.dataset.fileTitle||'').toLowerCase();
+            if (!q || title.includes(q)) { card.style.display = ''; visible++; } else { card.style.display = 'none'; }
+        });
+        document.getElementById('no-results').classList.toggle('hidden', visible !== 0);
+    });
+
+    // Fullscreen
+    function openFullscreen(url, title){
+        const modal = document.getElementById('fullscreen-modal');
+        const img = document.getElementById('fullscreen-image');
+        img.src = url;
+        img.alt = title||'';
+        modal.classList.add('active');
+        modal.setAttribute('aria-hidden','false');
+        document.body.style.overflow = 'hidden';
+    }
+    function closeFullscreen(){
+        const modal = document.getElementById('fullscreen-modal');
+        modal.classList.remove('active');
+        modal.setAttribute('aria-hidden','true');
+        document.body.style.overflow = '';
+        document.getElementById('fullscreen-image').src = '';
+    }
+    document.getElementById('fullscreen-close').addEventListener('click', closeFullscreen);
+    document.addEventListener('keydown', (e) => { if (e.key === 'Escape') { closeFullscreen(); closeDetailsPanel(); } });
+    document.getElementById('fullscreen-modal').addEventListener('click', (e) => { if (e.target.id === 'fullscreen-modal') closeFullscreen(); });
+
+    // initialize lucide icons again for dynamic inserts
+    lucide.createIcons();
+</script>
 </body>
 </html>
