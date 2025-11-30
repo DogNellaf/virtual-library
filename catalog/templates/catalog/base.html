@@ -87,9 +87,11 @@
         #files-grid.list-view .meta { flex:1 1 auto; min-width:0; padding:0 12px; display:flex; align-items:center; gap:12px; box-sizing:border-box; }
         /* inline info row for list mode */
         #files-grid.list-view .meta .info-inline { display:flex; align-items:center; gap:10px; width:100%; min-width:0; }
-        #files-grid.list-view .meta .title { flex:1 1 auto; min-width:0; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; font-size:.9375rem; font-weight:500; color:#111827; }
+        /* allow wrapping and no ellipsis for title */
+        #files-grid.list-view .meta .title { flex:1 1 auto; min-width:0; white-space:normal; overflow:visible; text-overflow:clip; word-break:break-word; font-size:.9375rem; font-weight:500; color:#111827; }
         #files-grid.list-view .meta .attrs { display:flex; gap:8px; flex:0 0 auto; align-items:center; }
-        #files-grid.list-view .meta .attrs .attr { font-size:12px; color:#6b7280; white-space:nowrap; max-width:120px; overflow:hidden; text-overflow:ellipsis; }
+        /* allow wrapping and no ellipsis for attrs */
+        #files-grid.list-view .meta .attrs .attr { font-size:12px; color:#6b7280; white-space:normal; max-width:120px; overflow:visible; text-overflow:clip; word-break:break-word; }
         /* hide grid-only elements in list mode */
         #files-grid.list-view .meta .grid-only { display:none; }
 
