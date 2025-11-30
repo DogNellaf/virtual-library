@@ -10,6 +10,8 @@ echo "-> Database is up — running migrations"
 # Применение миграций
 python manage.py migrate
 
+python manage.py create_update_admin
+
 # Сбор статических файлов
 python manage.py collectstatic --noinput
 
