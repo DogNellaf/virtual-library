@@ -18,4 +18,4 @@ echo "from django.contrib.auth import get_user_model; User = get_user_model(); U
 
 # Запуск Gunicorn
 echo "-> Starting gunicorn"
-exec gunicorn your_project.wsgi:application --bind 0.0.0.0:8000
+exec gunicorn virtual_library.wsgi:application --bind 0.0.0.0:8000
