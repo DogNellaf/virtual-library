@@ -14,10 +14,11 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
     netcat-openbsd \
   && rm -rf /var/lib/apt/lists/*
 
-# скопировать requirements (или poetry/pyproject) и установить зависимости
+# скопировать requirements и установить зависимости
 COPY requirements.txt /app/requirements.txt
 RUN pip install --upgrade pip
 RUN pip install -r /app/requirements.txt
+RUN pip install gunicorn  # Добавлена установка gunicorn
 
 # копируем проект
 COPY . /app
@@ -29,5 +30,5 @@ RUN chmod +x /start.sh
 # порт приложения
 EXPOSE 8000
 
-# default command — через docker-compose переопределяем на /start.sh
+# default command
 CMD ["/start.sh"]
