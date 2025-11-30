@@ -318,6 +318,21 @@
             #files-grid.list-view .thumb { width: 48px; height: 48px; flex: 0 0 48px; }
             #files-grid.list-view .file-card { height: 56px; }
         }
+
+        #files-grid.grid-view .meta .title {
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            max-width: 10ch; /* Ограничение до ~10 символов */
+        }
+
+        /* Обрезка названия в list-view */
+        #files-grid.list-view .meta .title {
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            max-width: 10ch; /* Ограничение до ~10 символов */
+        }
     </style>
 </head>
 <body class="bg-white text-zinc-900 selection:bg-zinc-100 selection:text-zinc-900">
@@ -421,7 +436,7 @@
                     </div>
                 </div>
 
-                <a href="admin" id="admin-btn" class="flex items-center gap-2 px-3 py-1.5 bg-zinc-900 hover:bg-zinc-800 text-white text-sm font-medium rounded-lg shadow-sm transition-all admin-btn" title="Администрирование">
+                <a href="{% url 'admin:index' %}" id="admin-btn" class="flex items-center gap-2 px-3 py-1.5 bg-zinc-900 hover:bg-zinc-800 text-white text-sm font-medium rounded-lg shadow-sm transition-all admin-btn" title="Администрирование">
                     <i data-lucide="upload-cloud" class="w-4 h-4"></i><span class="admin-label">Администрирование</span>
                 </a>
             </div>
