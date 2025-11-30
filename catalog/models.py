@@ -24,7 +24,7 @@ class File(models.Model):
         verbose_name="Название"
     )
 
-    file = models.ImageField(
+    file = models.FileField(
         upload_to='uploads/',
         verbose_name="Файл"
     )
