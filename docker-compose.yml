@@ -26,7 +26,7 @@ services:
     env_file:
       - .env
     volumes:
-      - ./:/app    # удобнее для разработки; в production можно убрать/изменить
+      - ./:/app
       - static_volume:/app/staticfiles
       - media_volume:/app/media
     ports:
