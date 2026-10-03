@@ -1,0 +1,11 @@
+{% extends "catalog/base.html" %}
+{% load i18n catalog %}
+{% block title %}{% translate "Page not found" %}{% endblock %}
+{% block body %}
+<main class="empty standalone">
+  {% icon "search" "icon empty-icon" %}
+  <h1>{% translate "Page not found" %}</h1>
+  <p>{% translate "The file may have been removed, or the link is wrong." %}</p>
+  <a class="button primary" href="{% url 'index' %}">{% translate "Back to the library" %}</a>
+</main>
+{% endblock %}

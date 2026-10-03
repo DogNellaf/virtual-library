@@ -1,0 +1,304 @@
+# Russian translation of the media library.
+msgid ""
+msgstr ""
+"Project-Id-Version: virtual-library\n"
+"Report-Msgid-Bugs-To: \n"
+"POT-Creation-Date: 2026-10-03 20:14+0000\n"
+"PO-Revision-Date: 2026-10-03 20:00+0000\n"
+"Last-Translator: DogNellaf\n"
+"Language-Team: Russian\n"
+"Language: ru\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Plural-Forms: nplurals=4; plural=(n%10==1 && n%100!=11 ? 0 : n%10>=2 && "
+"n%10<=4 && (n%100<12 || n%100>14) ? 1 : n%10==0 || (n%10>=5 && n%10<=9) || "
+"(n%100>=11 && n%100<=14)? 2 : 3);\n"
+
+msgid "Media library"
+msgstr "Медиатека"
+
+msgid "Administration"
+msgstr "Администрирование"
+
+#, python-format
+msgid "The file is too large. The limit is %(limit)s."
+msgstr "Файл слишком большой. Ограничение %(limit)s."
+
+msgid "files"
+msgstr "файлы"
+
+msgid "Stored file"
+msgstr "Сохранённый файл"
+
+msgid "preview"
+msgstr "превью"
+
+msgid "size"
+msgstr "размер"
+
+msgid "dimensions"
+msgstr "разрешение"
+
+msgid "used"
+msgstr "занято"
+
+msgid "quota"
+msgstr "квота"
+
+msgid "No limit"
+msgstr "Без ограничения"
+
+msgid "Catalog"
+msgstr "Каталог"
+
+msgid "name"
+msgstr "название"
+
+msgid "description"
+msgstr "описание"
+
+msgid "Internal note, not shown in the catalog."
+msgstr "Заметка для сотрудников, в каталоге не показывается."
+
+msgid "category"
+msgstr "категория"
+
+msgid "categories"
+msgstr "категории"
+
+msgid "Image"
+msgstr "Изображение"
+
+msgid "Document"
+msgstr "Документ"
+
+msgid "Spreadsheet"
+msgstr "Таблица"
+
+msgid "Presentation"
+msgstr "Презентация"
+
+msgid "Audio"
+msgstr "Аудио"
+
+msgid "Video"
+msgstr "Видео"
+
+msgid "Archive"
+msgstr "Архив"
+
+msgid "Other"
+msgstr "Другое"
+
+msgid "title"
+msgstr "название"
+
+msgid "file"
+msgstr "файл"
+
+msgid "uploaded"
+msgstr "загружен"
+
+msgid "original name"
+msgstr "исходное имя"
+
+msgid "size, bytes"
+msgstr "размер, байт"
+
+msgid "type"
+msgstr "тип"
+
+msgid "quota, bytes"
+msgstr "квота, байт"
+
+msgid "Total size of all files. 0 means no limit."
+msgstr "Общий размер всех файлов. 0 значит без ограничения."
+
+msgid "storage"
+msgstr "хранилище"
+
+msgid "File storage"
+msgstr "Хранилище файлов"
+
+#, python-format
+msgid "Not enough space: the file is %(size)s, %(free)s left of %(quota)s."
+msgstr "Не хватает места. Размер файла %(size)s, свободно %(free)s из %(quota)s."
+
+msgid "Details"
+msgstr "Свойства"
+
+msgid "Close"
+msgstr "Закрыть"
+
+msgid "Open full size"
+msgstr "Открыть в полном размере"
+
+#, python-format
+msgid "Added %(date)s"
+msgstr "Добавлен %(date)s"
+
+msgid "Type"
+msgstr "Тип"
+
+msgid "Size"
+msgstr "Размер"
+
+msgid "Dimensions"
+msgstr "Разрешение"
+
+msgid "Category"
+msgstr "Категория"
+
+msgid "File name"
+msgstr "Имя файла"
+
+msgid "Description"
+msgstr "Описание"
+
+msgid "No description."
+msgstr "Описания нет."
+
+msgid "Download"
+msgstr "Скачать"
+
+msgid "Edit"
+msgstr "Изменить"
+
+msgid "Categories"
+msgstr "Категории"
+
+msgid "All files"
+msgstr "Все файлы"
+
+msgid "No categories yet."
+msgstr "Категорий пока нет."
+
+msgid "Storage"
+msgstr "Хранилище"
+
+#, python-format
+msgid "%(used)s of %(quota)s"
+msgstr "%(used)s из %(quota)s"
+
+#, python-format
+msgid "%(used)s used"
+msgstr "Занято %(used)s"
+
+msgid "Storage used"
+msgstr "Занято в хранилище"
+
+msgid "Search by title or description"
+msgstr "Поиск по названию и описанию"
+
+msgid "Search"
+msgstr "Поиск"
+
+msgid "View"
+msgstr "Вид"
+
+msgid "Grid"
+msgstr "Плитка"
+
+msgid "List"
+msgstr "Список"
+
+msgid "Language and theme"
+msgstr "Язык и тема"
+
+msgid "Manage files"
+msgstr "Управление файлами"
+
+msgid "Manage"
+msgstr "Управление"
+
+#, python-format
+msgid "%(counter)s file"
+msgid_plural "%(counter)s files"
+msgstr[0] "%(counter)s файл"
+msgstr[1] "%(counter)s файла"
+msgstr[2] "%(counter)s файлов"
+msgstr[3] "%(counter)s файлов"
+
+#, python-format
+msgid "matching “%(q)s”"
+msgstr "по запросу «%(q)s»"
+
+msgid "File type"
+msgstr "Тип файла"
+
+msgid "Any type"
+msgstr "Любой тип"
+
+msgid "Pages"
+msgstr "Страницы"
+
+msgid "Previous"
+msgstr "Назад"
+
+#, python-format
+msgid "Page %(number)s of %(total)s"
+msgstr "Страница %(number)s из %(total)s"
+
+msgid "Next"
+msgstr "Вперёд"
+
+msgid "Nothing matches these filters."
+msgstr "По этим условиям ничего не нашлось."
+
+msgid "Show all files"
+msgstr "Показать все файлы"
+
+msgid "The library is empty. Files added in the admin panel appear here."
+msgstr "В медиатеке пока пусто. Файлы, добавленные в панели управления, появятся здесь."
+
+msgid "Upload a file"
+msgstr "Загрузить файл"
+
+msgid "Newest first"
+msgstr "Сначала новые"
+
+msgid "Oldest first"
+msgstr "Сначала старые"
+
+msgid "Name, A to Z"
+msgstr "По названию, А–Я"
+
+msgid "Name, Z to A"
+msgstr "По названию, Я–А"
+
+msgid "Smallest first"
+msgstr "Сначала маленькие"
+
+msgid "Largest first"
+msgstr "Сначала большие"
+
+msgid "System"
+msgstr "Как в системе"
+
+msgid "Light"
+msgstr "Светлая"
+
+msgid "Dark"
+msgstr "Тёмная"
+
+msgid "Page not found"
+msgstr "Страница не найдена"
+
+msgid "The file may have been removed, or the link is wrong."
+msgstr "Возможно, файл удалили или в ссылке ошибка."
+
+msgid "Back to the library"
+msgstr "Вернуться в медиатеку"
+
+#, python-format
+msgid ""
+"Demo account <strong>%(demo_username)s</strong>, password "
+"<strong>%(demo_password)s</strong>."
+msgstr "Демо-аккаунт <strong>%(demo_username)s</strong>, пароль <strong>%(demo_password)s</strong>."
+
+msgid "English"
+msgstr "Английский"
+
+msgid "Russian"
+msgstr "Русский"

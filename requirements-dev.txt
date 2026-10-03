@@ -1,0 +1,4 @@
+-r requirements.txt
+coverage==7.16.2
+playwright==1.63.0
+ruff==0.16.10

@@ -1,0 +1,48 @@
+{% load i18n catalog %}
+<aside class="details" aria-labelledby="details-title">
+  <header class="details-header">
+    <span class="details-label">{% translate "Details" %}</span>
+    <a class="icon-button" href="{% querystring file=None %}" data-close title="{% translate 'Close' %}">{% icon "close" %}<span class="sr-only">{% translate "Close" %}</span></a>
+  </header>
+  <div class="details-body">
+    {% if file.thumbnail %}
+      <a class="preview" href="#zoom" title="{% translate 'Open full size' %}">
+        <img src="{% url 'file_thumbnail' file.pk %}" alt="{{ file.title }}">
+        <span class="preview-hint">{% icon "expand" %}</span>
+      </a>
+    {% else %}
+      <div class="preview kind-{{ file.kind }}">{% icon file.kind "icon preview-icon" %}<span class="ext">{{ file.extension }}</span></div>
+    {% endif %}
+
+    <h2 id="details-title">{{ file.title }}</h2>
+    <p class="muted">{% blocktranslate with date=file.upload_date|date:"DATETIME_FORMAT" %}Added {{ date }}{% endblocktranslate %}</p>
+
+    <dl class="facts">
+      <dt>{% translate "Type" %}</dt><dd>{{ file.get_kind_display }}{% if file.extension %} · {{ file.extension }}{% endif %}</dd>
+      <dt>{% translate "Size" %}</dt><dd>{{ file.size|filesizeformat }}</dd>
+      {% if file.width %}<dt>{% translate "Dimensions" %}</dt><dd>{{ file.width }} × {{ file.height }} px</dd>{% endif %}
+      <dt>{% translate "Category" %}</dt><dd><a href="{% querystring category=file.category_id page=None file=None %}">{{ file.category.name }}</a></dd>
+      <dt>{% translate "File name" %}</dt><dd class="break">{{ file.download_name }}</dd>
+    </dl>
+
+    <h3>{% translate "Description" %}</h3>
+    {% if file.description %}
+      <p class="description">{{ file.description|linebreaksbr }}</p>
+    {% else %}
+      <p class="muted">{% translate "No description." %}</p>
+    {% endif %}
+  </div>
+  <footer class="details-footer">
+    <a class="button primary wide" href="{% url 'file_download' file.pk %}">{% icon "download" %}{% translate "Download" %}</a>
+    {% if perms.catalog.change_file %}
+      <a class="button" href="{% url 'admin:catalog_file_change' file.pk %}">{% translate "Edit" %}</a>
+    {% endif %}
+  </footer>
+</aside>
+{% if file.is_image %}
+  <div class="lightbox" id="zoom" role="dialog" aria-label="{{ file.title }}">
+    <a class="lightbox-backdrop" href="#" data-close-zoom><span class="sr-only">{% translate "Close" %}</span></a>
+    <img src="{% url 'file_preview' file.pk %}" alt="{{ file.title }}" loading="lazy">
+    <a class="icon-button lightbox-close" href="#" data-close-zoom title="{% translate 'Close' %}">{% icon "close" %}</a>
+  </div>
+{% endif %}
