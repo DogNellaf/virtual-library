@@ -286,5 +286,5 @@ PostgreSQL 17 с Python 3.13 и на SQLite с Python 3.12, проверяет �
 
 [PolyForm Noncommercial 1.0.0](LICENSE). Использование, изменение и
 распространение разрешены в любых некоммерческих целях при сохранении
-уведомления `Copyright (c) 2025 DogNellaf`. Для коммерческого использования
+уведомления `Copyright (c) 2026 DogNellaf`. Для коммерческого использования
 нужна отдельная лицензия, пишите [DogNellaf](https://github.com/DogNellaf).

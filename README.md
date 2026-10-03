@@ -278,5 +278,5 @@ error.
 
 [PolyForm Noncommercial 1.0.0](LICENSE). Use, modification and redistribution
 are allowed for any noncommercial purpose, provided the notice
-`Copyright (c) 2025 DogNellaf` is kept. Commercial use requires a separate
+`Copyright (c) 2026 DogNellaf` is kept. Commercial use requires a separate
 license, contact [DogNellaf](https://github.com/DogNellaf).
