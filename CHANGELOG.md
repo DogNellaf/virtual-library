@@ -13,7 +13,7 @@ The first release after the overhaul of the 2025 prototype.
 - Search by title, description and file name that ignores case and "ё".
 - Filters by category and file type, sorting, grid and list views and pagination, all kept in the URL.
 - Details panel with a full-size image view, also kept in the URL.
-- Russian translation, dark theme and a phone layout.
+- Russian, French and German translations, dark theme and a phone layout.
 - Health check, Content Security Policy and HTTPS settings for production.
 - Demo content and a demo account for `docker compose up`.
 - Tests on SQLite and PostgreSQL, a browser smoke test, CI, Dependabot and releases.

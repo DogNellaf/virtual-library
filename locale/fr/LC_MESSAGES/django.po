@@ -1,0 +1,313 @@
+# French translation of the media library.
+msgid ""
+msgstr ""
+"Project-Id-Version: virtual-library\n"
+"Report-Msgid-Bugs-To: \n"
+"POT-Creation-Date: 2026-10-03 21:02+0000\n"
+"PO-Revision-Date: 2026-10-03 21:00+0000\n"
+"Last-Translator: DogNellaf\n"
+"Language-Team: French\n"
+"Language: fr\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Plural-Forms: nplurals=3; plural=(n == 0 || n == 1) ? 0 : n != 0 && n % 1000000 == 0 ? 1 : 2;\n"
+
+msgid "Media library"
+msgstr "Médiathèque"
+
+msgid "Administration"
+msgstr "Administration"
+
+#, python-format
+msgid "The file is too large. The limit is %(limit)s."
+msgstr "Le fichier est trop volumineux. La limite est de %(limit)s."
+
+msgid "files"
+msgstr "fichiers"
+
+msgid "Stored file"
+msgstr "Fichier enregistré"
+
+msgid "preview"
+msgstr "aperçu"
+
+msgid "original name"
+msgstr "nom d’origine"
+
+msgid "size"
+msgstr "taille"
+
+msgid "dimensions"
+msgstr "dimensions"
+
+msgid "used"
+msgstr "utilisé"
+
+msgid "quota"
+msgstr "quota"
+
+msgid "No limit"
+msgstr "Sans limite"
+
+msgid "Catalog"
+msgstr "Catalogue"
+
+msgid "name"
+msgstr "nom"
+
+msgid "description"
+msgstr "description"
+
+msgid "Internal note, not shown in the catalog."
+msgstr "Note interne, non affichée dans le catalogue."
+
+msgid "category"
+msgstr "catégorie"
+
+msgid "categories"
+msgstr "catégories"
+
+msgid "Image"
+msgstr "Image"
+
+msgid "Document"
+msgstr "Document"
+
+msgid "Spreadsheet"
+msgstr "Tableur"
+
+msgid "Presentation"
+msgstr "Présentation"
+
+msgid "Audio"
+msgstr "Audio"
+
+msgid "Video"
+msgstr "Vidéo"
+
+msgid "Archive"
+msgstr "Archive"
+
+msgid "Other"
+msgstr "Autre"
+
+msgid "title"
+msgstr "titre"
+
+msgid "file"
+msgstr "fichier"
+
+msgid "uploaded"
+msgstr "ajouté le"
+
+msgid "size, bytes"
+msgstr "taille, octets"
+
+msgid "type"
+msgstr "type"
+
+msgid "quota, bytes"
+msgstr "quota, octets"
+
+msgid "Total size of all files. 0 means no limit."
+msgstr "Taille totale de tous les fichiers. 0 signifie sans limite."
+
+msgid "storage"
+msgstr "stockage"
+
+msgid "File storage"
+msgstr "Stockage des fichiers"
+
+#, python-format
+msgid "Not enough space: the file is %(size)s, %(free)s left of %(quota)s."
+msgstr ""
+"Espace insuffisant. Le fichier fait %(size)s, il reste %(free)s sur "
+"%(quota)s."
+
+msgid "Details"
+msgstr "Détails"
+
+msgid "Close"
+msgstr "Fermer"
+
+msgid "Open full size"
+msgstr "Ouvrir en taille réelle"
+
+#, python-format
+msgid "Added %(date)s"
+msgstr "Ajouté le %(date)s"
+
+msgid "Type"
+msgstr "Type"
+
+msgid "Size"
+msgstr "Taille"
+
+msgid "Dimensions"
+msgstr "Dimensions"
+
+msgid "Category"
+msgstr "Catégorie"
+
+msgid "File name"
+msgstr "Nom du fichier"
+
+msgid "Description"
+msgstr "Description"
+
+msgid "No description."
+msgstr "Pas de description."
+
+msgid "Download"
+msgstr "Télécharger"
+
+msgid "Edit"
+msgstr "Modifier"
+
+msgid "Categories"
+msgstr "Catégories"
+
+msgid "All files"
+msgstr "Tous les fichiers"
+
+msgid "No categories yet."
+msgstr "Aucune catégorie pour l’instant."
+
+msgid "Storage"
+msgstr "Stockage"
+
+#, python-format
+msgid "%(used)s of %(quota)s"
+msgstr "%(used)s sur %(quota)s"
+
+#, python-format
+msgid "%(used)s used"
+msgstr "%(used)s utilisés"
+
+msgid "Storage used"
+msgstr "Stockage utilisé"
+
+msgid "Search files"
+msgstr "Rechercher"
+
+msgid "Search"
+msgstr "Recherche"
+
+msgid "View"
+msgstr "Affichage"
+
+msgid "Grid"
+msgstr "Grille"
+
+msgid "List"
+msgstr "Liste"
+
+msgid "Language and theme"
+msgstr "Langue et thème"
+
+msgid "Manage files"
+msgstr "Gérer les fichiers"
+
+msgid "Manage"
+msgstr "Gérer"
+
+#, python-format
+msgid "%(counter)s file"
+msgid_plural "%(counter)s files"
+msgstr[0] "%(counter)s fichier"
+msgstr[1] "%(counter)s de fichiers"
+msgstr[2] "%(counter)s fichiers"
+
+#, python-format
+msgid "matching “%(q)s”"
+msgstr "pour « %(q)s »"
+
+msgid "File type"
+msgstr "Type de fichier"
+
+msgid "Any type"
+msgstr "Tous les types"
+
+msgid "Pages"
+msgstr "Pages"
+
+msgid "Previous"
+msgstr "Précédent"
+
+#, python-format
+msgid "Page %(number)s of %(total)s"
+msgstr "Page %(number)s sur %(total)s"
+
+msgid "Next"
+msgstr "Suivant"
+
+msgid "Nothing matches these filters."
+msgstr "Aucun fichier ne correspond à ces filtres."
+
+msgid "Show all files"
+msgstr "Afficher tous les fichiers"
+
+msgid "The library is empty. Files added in the admin panel appear here."
+msgstr ""
+"La médiathèque est vide. Les fichiers ajoutés dans l’administration "
+"apparaissent ici."
+
+msgid "Upload a file"
+msgstr "Ajouter un fichier"
+
+msgid "Newest first"
+msgstr "Plus récents d’abord"
+
+msgid "Oldest first"
+msgstr "Plus anciens d’abord"
+
+msgid "Name, A to Z"
+msgstr "Nom, de A à Z"
+
+msgid "Name, Z to A"
+msgstr "Nom, de Z à A"
+
+msgid "Smallest first"
+msgstr "Plus petits d’abord"
+
+msgid "Largest first"
+msgstr "Plus grands d’abord"
+
+msgid "System"
+msgstr "Système"
+
+msgid "Light"
+msgstr "Clair"
+
+msgid "Dark"
+msgstr "Sombre"
+
+msgid "Page not found"
+msgstr "Page introuvable"
+
+msgid "The file may have been removed, or the link is wrong."
+msgstr "Le fichier a peut-être été supprimé, ou le lien est erroné."
+
+msgid "Back to the library"
+msgstr "Retour à la médiathèque"
+
+#, python-format
+msgid ""
+"Demo account <strong>%(demo_username)s</strong>, password "
+"<strong>%(demo_password)s</strong>."
+msgstr ""
+"Compte de démonstration <strong>%(demo_username)s</strong>, mot de passe "
+"<strong>%(demo_password)s</strong>."
+
+msgid "English"
+msgstr "Anglais"
+
+msgid "Russian"
+msgstr "Russe"
+
+msgid "French"
+msgstr "Français"
+
+msgid "German"
+msgstr "Allemand"

@@ -1,6 +1,6 @@
 # Media Library
 
-> 🇬🇧 English | [🇷🇺 Русский](README.ru.md)
+> 🇬🇧 English | [🇷🇺 Русский](README.ru.md) | [🇫🇷 Français](README.fr.md) | [🇩🇪 Deutsch](README.de.md)
 
 [![CI](https://github.com/DogNellaf/virtual-library/actions/workflows/ci.yml/badge.svg)](https://github.com/DogNellaf/virtual-library/actions/workflows/ci.yml)
 [![Release](https://img.shields.io/github/v/release/DogNellaf/virtual-library)](https://github.com/DogNellaf/virtual-library/releases)
@@ -12,7 +12,7 @@
 A media library for a public library. Staff upload images, documents and other
 files in the admin panel and sort them into categories. Visitors browse the
 catalog, search it, preview images and download files. The interface is in
-English and Russian and has a dark theme and a phone layout.
+English, Russian, French and German and has a dark theme and a phone layout.
 
 ![Catalog](docs/screenshots/en/catalog.png)
 
@@ -122,12 +122,13 @@ or 10 000, and a test fails if that number grows with the number of files.
 
 ### Localization
 
-- English source strings with a Russian gettext catalog in `locale/`, including
-  plural forms ("1 file", "2 файла", "5 файлов") and model names in the admin.
+- English source strings with Russian, French and German gettext catalogs in
+  `locale/`, including plural forms ("2 файла", "5 файлов", "2 fichiers",
+  "2 Dateien") and model names in the admin.
 - The language comes from a cookie set by the language menu, then from the
   browser. Dates and file sizes follow the language ("Oct. 3, 2026" and
   "3 октября 2026 г.", "35.2 KB" and "35,2 КБ").
-- CI checks that the compiled `.mo` catalog matches the `.po` source.
+- CI checks that the compiled `.mo` catalogs match the `.po` sources.
 
 ### Architecture
 
@@ -167,7 +168,8 @@ maintained product involved
 - serving files through views instead of a public folder, and adding a CSP;
 - replacing the Tailwind and icon CDNs with hand-written CSS and an SVG sprite,
   and django-jet with the standard admin;
-- adding the Russian translation, the dark theme and the phone layout;
+- adding the Russian, French and German translations, the dark theme and the
+  phone layout;
 - moving settings to environment variables and upgrading to Django 6.1,
   Python 3.13 and PostgreSQL 17;
 - adding tests, Docker, CI with a browser smoke test, demo data and releases.
@@ -247,11 +249,11 @@ python docker/smoke_test.py
 python scripts/screenshots.py
 ```
 
-There are 67 tests with 99% coverage, and the CI threshold is 90%. CI runs them
+There are 68 tests with 99% coverage, and the CI threshold is 90%. CI runs them
 on SQLite and PostgreSQL 17 with Python 3.13 and on SQLite with Python 3.12,
-checks migrations, translations and the production settings, then builds the image, starts the stack and runs the browser smoke
-test. It uploads and deletes a file through the admin and fails on any console
-error.
+checks migrations, translations and the production settings, then builds the
+image, starts the stack and runs the browser smoke test. It uploads and deletes
+a file through the admin and fails on any console error.
 
 ## Project structure
 
@@ -263,7 +265,7 @@ error.
 │   ├── templates/catalog/
 │   ├── tests/
 │   ├── admin.py  media.py  models.py  services.py  views.py
-├── locale/ru/                 # Russian translation
+├── locale/                    # Russian, French and German translations
 ├── templates/                 # 404 page, admin sign-in
 ├── virtual_library/           # settings and URLs
 ├── docker/                    # entrypoint and browser smoke test

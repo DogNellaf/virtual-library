@@ -86,9 +86,9 @@ AUTH_PASSWORD_VALIDATORS = [
     {"NAME": "django.contrib.auth.password_validation.NumericPasswordValidator"},
 ]
 
-# Localization. English source strings, Russian catalog in locale/.
+# Localization. English source strings, Russian, French and German catalogs in locale/.
 LANGUAGE_CODE = "en"
-LANGUAGES = [("en", _("English")), ("ru", _("Russian"))]
+LANGUAGES = [("en", _("English")), ("ru", _("Russian")), ("fr", _("French")), ("de", _("German"))]
 LOCALE_PATHS = [BASE_DIR / "locale"]
 USE_I18N = True
 TIME_ZONE = env.str("DJANGO_TIME_ZONE", default="UTC")

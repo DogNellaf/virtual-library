@@ -16,7 +16,7 @@ BASE_URL = os.environ.get("BASE_URL", "http://localhost:8000").rstrip("/")
 OUT = Path(__file__).resolve().parent.parent / "docs" / "screenshots"
 DESKTOP = {"width": 1440, "height": 900}
 PHONE = {"width": 390, "height": 844}
-LANGUAGES = ["en", "ru"]
+LANGUAGES = ["en", "ru", "fr", "de"]
 
 
 def reseed() -> None:

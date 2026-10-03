@@ -1,0 +1,310 @@
+# German translation of the media library.
+msgid ""
+msgstr ""
+"Project-Id-Version: virtual-library\n"
+"Report-Msgid-Bugs-To: \n"
+"POT-Creation-Date: 2026-10-03 21:02+0000\n"
+"PO-Revision-Date: 2026-10-03 21:00+0000\n"
+"Last-Translator: DogNellaf\n"
+"Language-Team: German\n"
+"Language: de\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Plural-Forms: nplurals=2; plural=(n != 1);\n"
+
+msgid "Media library"
+msgstr "Mediathek"
+
+msgid "Administration"
+msgstr "Verwaltung"
+
+#, python-format
+msgid "The file is too large. The limit is %(limit)s."
+msgstr "Die Datei ist zu groß. Die Grenze liegt bei %(limit)s."
+
+msgid "files"
+msgstr "Dateien"
+
+msgid "Stored file"
+msgstr "Gespeicherte Datei"
+
+msgid "preview"
+msgstr "Vorschau"
+
+msgid "original name"
+msgstr "Originalname"
+
+msgid "size"
+msgstr "Größe"
+
+msgid "dimensions"
+msgstr "Abmessungen"
+
+msgid "used"
+msgstr "belegt"
+
+msgid "quota"
+msgstr "Kontingent"
+
+msgid "No limit"
+msgstr "Unbegrenzt"
+
+msgid "Catalog"
+msgstr "Katalog"
+
+msgid "name"
+msgstr "Name"
+
+msgid "description"
+msgstr "Beschreibung"
+
+msgid "Internal note, not shown in the catalog."
+msgstr "Interne Notiz, wird im Katalog nicht angezeigt."
+
+msgid "category"
+msgstr "Kategorie"
+
+msgid "categories"
+msgstr "Kategorien"
+
+msgid "Image"
+msgstr "Bild"
+
+msgid "Document"
+msgstr "Dokument"
+
+msgid "Spreadsheet"
+msgstr "Tabelle"
+
+msgid "Presentation"
+msgstr "Präsentation"
+
+msgid "Audio"
+msgstr "Audio"
+
+msgid "Video"
+msgstr "Video"
+
+msgid "Archive"
+msgstr "Archiv"
+
+msgid "Other"
+msgstr "Sonstiges"
+
+msgid "title"
+msgstr "Titel"
+
+msgid "file"
+msgstr "Datei"
+
+msgid "uploaded"
+msgstr "hochgeladen"
+
+msgid "size, bytes"
+msgstr "Größe, Bytes"
+
+msgid "type"
+msgstr "Typ"
+
+msgid "quota, bytes"
+msgstr "Kontingent, Bytes"
+
+msgid "Total size of all files. 0 means no limit."
+msgstr "Gesamtgröße aller Dateien. 0 bedeutet unbegrenzt."
+
+msgid "storage"
+msgstr "Speicher"
+
+msgid "File storage"
+msgstr "Dateispeicher"
+
+#, python-format
+msgid "Not enough space: the file is %(size)s, %(free)s left of %(quota)s."
+msgstr ""
+"Nicht genug Platz. Die Datei ist %(size)s groß, frei sind %(free)s von "
+"%(quota)s."
+
+msgid "Details"
+msgstr "Details"
+
+msgid "Close"
+msgstr "Schließen"
+
+msgid "Open full size"
+msgstr "In voller Größe öffnen"
+
+#, python-format
+msgid "Added %(date)s"
+msgstr "Hinzugefügt am %(date)s"
+
+msgid "Type"
+msgstr "Typ"
+
+msgid "Size"
+msgstr "Größe"
+
+msgid "Dimensions"
+msgstr "Abmessungen"
+
+msgid "Category"
+msgstr "Kategorie"
+
+msgid "File name"
+msgstr "Dateiname"
+
+msgid "Description"
+msgstr "Beschreibung"
+
+msgid "No description."
+msgstr "Keine Beschreibung."
+
+msgid "Download"
+msgstr "Herunterladen"
+
+msgid "Edit"
+msgstr "Bearbeiten"
+
+msgid "Categories"
+msgstr "Kategorien"
+
+msgid "All files"
+msgstr "Alle Dateien"
+
+msgid "No categories yet."
+msgstr "Noch keine Kategorien."
+
+msgid "Storage"
+msgstr "Speicher"
+
+#, python-format
+msgid "%(used)s of %(quota)s"
+msgstr "%(used)s von %(quota)s"
+
+#, python-format
+msgid "%(used)s used"
+msgstr "%(used)s belegt"
+
+msgid "Storage used"
+msgstr "Belegter Speicher"
+
+msgid "Search files"
+msgstr "Dateien suchen"
+
+msgid "Search"
+msgstr "Suche"
+
+msgid "View"
+msgstr "Ansicht"
+
+msgid "Grid"
+msgstr "Raster"
+
+msgid "List"
+msgstr "Liste"
+
+msgid "Language and theme"
+msgstr "Sprache und Design"
+
+msgid "Manage files"
+msgstr "Dateien verwalten"
+
+msgid "Manage"
+msgstr "Verwalten"
+
+#, python-format
+msgid "%(counter)s file"
+msgid_plural "%(counter)s files"
+msgstr[0] "%(counter)s Datei"
+msgstr[1] "%(counter)s Dateien"
+
+#, python-format
+msgid "matching “%(q)s”"
+msgstr "für „%(q)s“"
+
+msgid "File type"
+msgstr "Dateityp"
+
+msgid "Any type"
+msgstr "Alle Typen"
+
+msgid "Pages"
+msgstr "Seiten"
+
+msgid "Previous"
+msgstr "Zurück"
+
+#, python-format
+msgid "Page %(number)s of %(total)s"
+msgstr "Seite %(number)s von %(total)s"
+
+msgid "Next"
+msgstr "Weiter"
+
+msgid "Nothing matches these filters."
+msgstr "Keine Dateien passen zu diesen Filtern."
+
+msgid "Show all files"
+msgstr "Alle Dateien anzeigen"
+
+msgid "The library is empty. Files added in the admin panel appear here."
+msgstr "Die Mediathek ist leer. Dateien aus der Verwaltung erscheinen hier."
+
+msgid "Upload a file"
+msgstr "Datei hochladen"
+
+msgid "Newest first"
+msgstr "Neueste zuerst"
+
+msgid "Oldest first"
+msgstr "Älteste zuerst"
+
+msgid "Name, A to Z"
+msgstr "Name, A bis Z"
+
+msgid "Name, Z to A"
+msgstr "Name, Z bis A"
+
+msgid "Smallest first"
+msgstr "Kleinste zuerst"
+
+msgid "Largest first"
+msgstr "Größte zuerst"
+
+msgid "System"
+msgstr "System"
+
+msgid "Light"
+msgstr "Hell"
+
+msgid "Dark"
+msgstr "Dunkel"
+
+msgid "Page not found"
+msgstr "Seite nicht gefunden"
+
+msgid "The file may have been removed, or the link is wrong."
+msgstr "Die Datei wurde vielleicht gelöscht, oder der Link ist falsch."
+
+msgid "Back to the library"
+msgstr "Zurück zur Mediathek"
+
+#, python-format
+msgid ""
+"Demo account <strong>%(demo_username)s</strong>, password "
+"<strong>%(demo_password)s</strong>."
+msgstr ""
+"Demokonto <strong>%(demo_username)s</strong>, Passwort "
+"<strong>%(demo_password)s</strong>."
+
+msgid "English"
+msgstr "Englisch"
+
+msgid "Russian"
+msgstr "Russisch"
+
+msgid "French"
+msgstr "Französisch"
+
+msgid "German"
+msgstr "Deutsch"

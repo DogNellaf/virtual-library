@@ -120,6 +120,18 @@ class CatalogTests(TempMediaMixin, TestCase):
         self.assertContains(response, "4 файла")
         self.assertContains(response, "Сначала новые")
 
+    def test_french_and_german_interfaces(self):
+        for language, files, sort in (
+            ("fr", "4 fichiers", "Plus récents d’abord"),
+            ("de", "4 Dateien", "Neueste zuerst"),
+        ):
+            with self.subTest(language=language):
+                self.client.post(reverse("set_language"), {"language": language, "next": "/"})
+                response = self.get()
+                self.assertContains(response, f'<html lang="{language}"')
+                self.assertContains(response, files)
+                self.assertContains(response, sort)
+
     def test_unknown_page_uses_the_library_template(self):
         response = self.client.get("/no-such-page/")
         self.assertEqual(response.status_code, 404)
