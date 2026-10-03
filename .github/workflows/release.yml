@@ -27,10 +27,28 @@ jobs:
             $0 ~ "^## \\[" v "\\]" { found = 1; next }
             found && /^(## )?\[/ { exit }
             found { print }
-          ' CHANGELOG.md > notes.md
-          test -s notes.md || { echo "No section for $version in CHANGELOG.md"; exit 1; }
+          ' CHANGELOG.md > section.md
+          test -s section.md || { echo "No section for $version in CHANGELOG.md"; exit 1; }
+          url="https://github.com/${{ github.repository }}/releases/download/$tag/catalog.webp"
+          { echo "![Catalog]($url)"; cat section.md; } > notes.md
           echo "TAG=$tag" >> "$GITHUB_ENV"
+      - uses: actions/setup-python@v7
+        with:
+          python-version: "3.13"
+      - name: Compress the screenshot
+        run: |
+          pip install pillow
+          python -c "from PIL import Image; Image.open('docs/screenshots/en/catalog.png').convert('RGB').save('catalog.webp', 'WEBP', quality=80, method=6)"
+          ls -l catalog.webp
       - name: Publish
-        run: gh release create "$TAG" --title "$TAG" --notes-file notes.md docs/screenshots/en/catalog.png
+        # Running the workflow again for an existing tag updates the notes and the screenshot.
+        run: |
+          if gh release view "$TAG" > /dev/null 2>&1; then
+            gh release edit "$TAG" --title "$TAG" --notes-file notes.md
+            gh release upload "$TAG" catalog.webp --clobber
+            gh release delete-asset "$TAG" catalog.png --yes || true
+          else
+            gh release create "$TAG" --title "$TAG" --notes-file notes.md catalog.webp
+          fi
         env:
           GH_TOKEN: ${{ github.token }}
