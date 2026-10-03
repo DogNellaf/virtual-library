@@ -1,40 +1,46 @@
+# Local demo: `docker compose up --build`, then open http://localhost:8000.
+# For a real deployment put the variables from .env.example into .env.
 services:
   db:
-    image: postgres:15
-    restart: always
-    env_file: 
-      - .env
+    image: postgres:17-alpine
     environment:
-      POSTGRES_USER: ${DATABASE_USERNAME}
-      POSTGRES_PASSWORD: ${DATABASE_PASSWORD}
-      POSTGRES_DB: ${DATABASE_NAME}
+      POSTGRES_DB: library
+      POSTGRES_USER: library
+      POSTGRES_PASSWORD: ${DATABASE_PASSWORD:-library}
     volumes:
       - pgdata:/var/lib/postgresql/data
     healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U ${DATABASE_USERNAME} -d ${DATABASE_NAME}"]
+      test: ["CMD-SHELL", "pg_isready -U library -d library"]
       interval: 5s
       timeout: 5s
-      retries: 5
+      retries: 10
+    restart: unless-stopped
 
   web:
-    build:
-      context: .
-      dockerfile: Dockerfile
-    command: ["/start.sh"]
-    env_file:
-      - .env
+    build: .
+    environment:
+      DJANGO_SECRET_KEY: ${DJANGO_SECRET_KEY:-local-demo-only-change-me-0123456789abcdefghijklmnop}
+      DJANGO_ALLOWED_HOSTS: ${DJANGO_ALLOWED_HOSTS:-localhost,127.0.0.1}
+      DJANGO_CSRF_TRUSTED_ORIGINS: ${DJANGO_CSRF_TRUSTED_ORIGINS:-}
+      DATABASE_URL: postgres://library:${DATABASE_PASSWORD:-library}@db:5432/library
+      HTTPS: ${HTTPS:-False}
+      USE_X_FORWARDED_PROTO: ${USE_X_FORWARDED_PROTO:-False}
+      STORAGE_QUOTA_BYTES: ${STORAGE_QUOTA_BYTES:-26214400}
+      FILE_UPLOAD_MAX_BYTES: ${FILE_UPLOAD_MAX_BYTES:-10485760}
+      ADMIN_USERNAME: ${ADMIN_USERNAME:-}
+      ADMIN_PASSWORD: ${ADMIN_PASSWORD:-}
+      DEMO_SEED: ${DEMO_SEED:-True}
+      DEMO_USERNAME: ${DEMO_USERNAME-demo}
+      DEMO_PASSWORD: ${DEMO_PASSWORD-demo12345}
     volumes:
-      - ./:/app
-      - static_volume:/app/staticfiles
-      - media_volume:/app/media
+      - media:/app/media
     ports:
-      - "8000:8000"
+      - "${PORT:-8000}:8000"
     depends_on:
       db:
         condition: service_healthy
-    restart: always
+    restart: unless-stopped
 
 volumes:
   pgdata:
-  static_volume:
-  media_volume:
+  media:
