@@ -8,6 +8,7 @@ htmlcov/
 # Django
 /media/
 /staticfiles/
+*.sqlite3
 .env
 
 # Tools
