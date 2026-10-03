@@ -1,0 +1,96 @@
+name: CI
+
+on:
+  push:
+    branches: [master]
+  pull_request:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+env:
+  PYTHON_VERSION: "3.13"
+
+jobs:
+  lint:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v5
+      - uses: actions/setup-python@v6
+        with:
+          python-version: ${{ env.PYTHON_VERSION }}
+          cache: pip
+          cache-dependency-path: requirements*.txt
+      - run: pip install -r requirements-dev.txt
+      - run: sudo apt-get install --yes --no-install-recommends gettext
+      - name: Lint and format
+        run: ruff check . && ruff format --check .
+      - name: Migrations are up to date
+        run: python manage.py makemigrations --check --dry-run
+        env:
+          DJANGO_DEBUG: "True"
+      - name: Compiled translations match the sources
+        run: |
+          python manage.py compilemessages --ignore=.venv
+          git diff --exit-code -- locale/
+        env:
+          DJANGO_DEBUG: "True"
+      - name: Check the production settings
+        run: python manage.py check --deploy --fail-level WARNING
+        env:
+          DJANGO_DEBUG: "False"
+          HTTPS: "True"
+          DJANGO_SECRET_KEY: ci-only-not-a-real-secret-key-0123456789abcdef-0123
+          DJANGO_ALLOWED_HOSTS: library.example
+
+  test:
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        database: [sqlite, postgres]
+    services:
+      postgres:
+        image: postgres:17-alpine
+        env:
+          POSTGRES_PASSWORD: postgres
+        ports: ["5432:5432"]
+        options: >-
+          --health-cmd pg_isready --health-interval 5s --health-timeout 5s --health-retries 10
+    steps:
+      - uses: actions/checkout@v5
+      - uses: actions/setup-python@v6
+        with:
+          python-version: ${{ env.PYTHON_VERSION }}
+          cache: pip
+          cache-dependency-path: requirements*.txt
+      - run: pip install -r requirements-dev.txt
+      - name: Tests with coverage
+        run: |
+          coverage run manage.py test --settings=virtual_library.settings_test
+          coverage report
+        env:
+          DATABASE_URL: ${{ matrix.database == 'postgres' && 'postgres://postgres:postgres@localhost:5432/library' || '' }}
+
+  e2e:
+    runs-on: ubuntu-latest
+    needs: [lint, test]
+    steps:
+      - uses: actions/checkout@v5
+      - uses: actions/setup-python@v6
+        with:
+          python-version: ${{ env.PYTHON_VERSION }}
+      - name: Install Playwright
+        run: |
+          pip install pillow $(grep '^playwright==' requirements-dev.txt)
+          python -m playwright install --with-deps chromium
+      - name: Build and start the stack
+        run: docker compose up --build --detach --wait --wait-timeout 300
+      - name: Smoke test
+        run: python docker/smoke_test.py
+        env:
+          BASE_URL: http://localhost:8000
+      - name: Logs on failure
+        if: failure()
+        run: docker compose logs --no-color --tail 200
