@@ -3,7 +3,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: virtual-library\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-10-03 20:14+0000\n"
+"POT-Creation-Date: 2026-10-03 20:35+0000\n"
 "PO-Revision-Date: 2026-10-03 20:00+0000\n"
 "Last-Translator: DogNellaf\n"
 "Language-Team: Russian\n"
@@ -33,6 +33,9 @@ msgstr "Сохранённый файл"
 
 msgid "preview"
 msgstr "превью"
+
+msgid "original name"
+msgstr "исходное имя"
 
 msgid "size"
 msgstr "размер"
@@ -100,9 +103,6 @@ msgstr "файл"
 msgid "uploaded"
 msgstr "загружен"
 
-msgid "original name"
-msgstr "исходное имя"
-
 msgid "size, bytes"
 msgstr "размер, байт"
 
@@ -123,7 +123,8 @@ msgstr "Хранилище файлов"
 
 #, python-format
 msgid "Not enough space: the file is %(size)s, %(free)s left of %(quota)s."
-msgstr "Не хватает места. Размер файла %(size)s, свободно %(free)s из %(quota)s."
+msgstr ""
+"Не хватает места. Размер файла %(size)s, свободно %(free)s из %(quota)s."
 
 msgid "Details"
 msgstr "Свойства"
@@ -188,8 +189,8 @@ msgstr "Занято %(used)s"
 msgid "Storage used"
 msgstr "Занято в хранилище"
 
-msgid "Search by title or description"
-msgstr "Поиск по названию и описанию"
+msgid "Search files"
+msgstr "Поиск файлов"
 
 msgid "Search"
 msgstr "Поиск"
@@ -250,7 +251,9 @@ msgid "Show all files"
 msgstr "Показать все файлы"
 
 msgid "The library is empty. Files added in the admin panel appear here."
-msgstr "В медиатеке пока пусто. Файлы, добавленные в панели управления, появятся здесь."
+msgstr ""
+"В медиатеке пока пусто. Файлы, добавленные в панели управления, появятся "
+"здесь."
 
 msgid "Upload a file"
 msgstr "Загрузить файл"
@@ -295,7 +298,9 @@ msgstr "Вернуться в медиатеку"
 msgid ""
 "Demo account <strong>%(demo_username)s</strong>, password "
 "<strong>%(demo_password)s</strong>."
-msgstr "Демо-аккаунт <strong>%(demo_username)s</strong>, пароль <strong>%(demo_password)s</strong>."
+msgstr ""
+"Демо-аккаунт <strong>%(demo_username)s</strong>, пароль "
+"<strong>%(demo_password)s</strong>."
 
 msgid "English"
 msgstr "Английский"

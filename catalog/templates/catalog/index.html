@@ -44,7 +44,7 @@
     <header class="topbar">
       <form class="search" method="get" action="{% url 'index' %}" role="search">
         {% icon "search" %}
-        <input type="search" name="q" value="{{ q }}" placeholder="{% translate 'Search by title or description' %}" aria-label="{% translate 'Search' %}" autocomplete="off">
+        <input type="search" name="q" value="{{ q }}" placeholder="{% translate 'Search files' %}" aria-label="{% translate 'Search' %}" autocomplete="off">
         {% if category %}<input type="hidden" name="category" value="{{ category.pk }}">{% endif %}
         {% if kind %}<input type="hidden" name="kind" value="{{ kind }}">{% endif %}
         {% if sort != "new" %}<input type="hidden" name="sort" value="{{ sort }}">{% endif %}
