@@ -1,0 +1,175 @@
+{% extends "catalog/base.html" %}
+{% load i18n catalog %}
+
+{% block title %}{% if selected %}{{ selected.title }} · {% elif category %}{{ category.name }} · {% endif %}{{ block.super }}{% endblock %}
+
+{% block body %}
+<div class="layout{% if selected %} has-details{% endif %}">
+  <aside class="sidebar">
+    <a class="brand" href="{% url 'index' %}">
+      <span class="brand-mark">{% icon "library" %}</span>
+      <span>{% translate "Media library" %}</span>
+    </a>
+    <nav class="nav" aria-label="{% translate 'Categories' %}">
+      <a class="nav-item" href="{% querystring category=None page=None file=None %}"{% if not category %} aria-current="page"{% endif %}>
+        {% icon "grid" %}<span>{% translate "All files" %}</span><span class="count">{{ total_count }}</span>
+      </a>
+      <p class="nav-heading">{% translate "Categories" %}</p>
+      {% for c in categories %}
+        <a class="nav-item" href="{% querystring category=c.pk page=None file=None %}"{% if c == category %} aria-current="page"{% endif %}>
+          {% icon "folder" %}<span>{{ c.name }}</span><span class="count">{{ c.files_count }}</span>
+        </a>
+      {% empty %}
+        <p class="nav-empty">{% translate "No categories yet." %}</p>
+      {% endfor %}
+    </nav>
+    <div class="storage">
+      <div class="storage-row">
+        <span>{% icon "storage" %}{% translate "Storage" %}</span>
+        <span class="muted">
+          {% if storage.quota %}
+            {% blocktranslate with used=storage.used|filesizeformat quota=storage.quota|filesizeformat %}{{ used }} of {{ quota }}{% endblocktranslate %}
+          {% else %}
+            {% blocktranslate with used=storage.used|filesizeformat %}{{ used }} used{% endblocktranslate %}
+          {% endif %}
+        </span>
+      </div>
+      {% if storage.quota %}
+        <progress class="meter" max="100" value="{{ storage.percent|stringformat:'.1f' }}" aria-label="{% translate 'Storage used' %}">{{ storage.percent }}%</progress>
+      {% endif %}
+    </div>
+  </aside>
+
+  <main class="main">
+    <header class="topbar">
+      <form class="search" method="get" action="{% url 'index' %}" role="search">
+        {% icon "search" %}
+        <input type="search" name="q" value="{{ q }}" placeholder="{% translate 'Search by title or description' %}" aria-label="{% translate 'Search' %}" autocomplete="off">
+        {% if category %}<input type="hidden" name="category" value="{{ category.pk }}">{% endif %}
+        {% if kind %}<input type="hidden" name="kind" value="{{ kind }}">{% endif %}
+        {% if sort != "new" %}<input type="hidden" name="sort" value="{{ sort }}">{% endif %}
+        {% if view != "grid" %}<input type="hidden" name="view" value="{{ view }}">{% endif %}
+      </form>
+
+      <div class="toolbar">
+        <div class="segmented" role="group" aria-label="{% translate 'View' %}">
+          <a href="{% querystring view=None %}" title="{% translate 'Grid' %}"{% if view == "grid" %} aria-current="true"{% endif %}>{% icon "grid" %}<span class="sr-only">{% translate "Grid" %}</span></a>
+          <a href="{% querystring view='list' %}" title="{% translate 'List' %}"{% if view == "list" %} aria-current="true"{% endif %}>{% icon "list" %}<span class="sr-only">{% translate "List" %}</span></a>
+        </div>
+
+        <details class="menu">
+          <summary class="button ghost">{% icon "sort" %}<span class="hide-sm">{{ sort_label }}</span></summary>
+          <div class="menu-panel">
+            {% for key, label in sorts.items %}
+              <a class="menu-item" href="{% querystring sort=key page=None %}"{% if key == sort %} aria-current="true"{% endif %}>{{ label }}{% if key == sort %}{% icon "check" %}{% endif %}</a>
+            {% endfor %}
+          </div>
+        </details>
+
+        <details class="menu">
+          <summary class="button ghost" title="{% translate 'Language and theme' %}">{% icon "globe" %}<span class="hide-sm">{{ LANGUAGE_CODE|upper }}</span></summary>
+          <div class="menu-panel">
+            <form method="post" action="{% url 'set_language' %}">
+              {% csrf_token %}
+              <input type="hidden" name="next" value="{{ request.get_full_path }}">
+              {% get_available_languages as LANGUAGES %}
+              {% get_language_info_list for LANGUAGES as languages %}
+              {% for language in languages %}
+                <button class="menu-item" name="language" value="{{ language.code }}"{% if language.code == LANGUAGE_CODE %} aria-current="true"{% endif %}>{{ language.name_local|capfirst }}{% if language.code == LANGUAGE_CODE %}{% icon "check" %}{% endif %}</button>
+              {% endfor %}
+            </form>
+            <div class="menu-divider"></div>
+            <form method="post" action="{% url 'set_theme' %}">
+              {% csrf_token %}
+              <input type="hidden" name="next" value="{{ request.get_full_path }}">
+              {% for key, label in themes.items %}
+                <button class="menu-item" name="theme" value="{{ key }}"{% if key == theme %} aria-current="true"{% endif %}>
+                  <span class="menu-label">{% if key == "light" %}{% icon "sun" %}{% elif key == "dark" %}{% icon "moon" %}{% else %}{% icon "monitor" %}{% endif %}{{ label }}</span>{% if key == theme %}{% icon "check" %}{% endif %}
+                </button>
+              {% endfor %}
+            </form>
+          </div>
+        </details>
+
+        <a class="button primary" href="{% url 'admin:index' %}" title="{% translate 'Manage files' %}">{% icon "upload" %}<span class="hide-sm">{% translate "Manage" %}</span></a>
+      </div>
+    </header>
+
+    <nav class="chips categories-chips" aria-label="{% translate 'Categories' %}">
+      <a class="chip" href="{% querystring category=None page=None file=None %}"{% if not category %} aria-current="page"{% endif %}>{% translate "All files" %}</a>
+      {% for c in categories %}
+        <a class="chip" href="{% querystring category=c.pk page=None file=None %}"{% if c == category %} aria-current="page"{% endif %}>{{ c.name }}</a>
+      {% endfor %}
+    </nav>
+
+    <div class="content">
+      <div class="heading">
+        <h1>{% if category %}{{ category.name }}{% else %}{% translate "All files" %}{% endif %}</h1>
+        <p class="muted">
+          {% blocktranslate count counter=page.paginator.count trimmed %}{{ counter }} file{% plural %}{{ counter }} files{% endblocktranslate %}{% if q %} · {% blocktranslate trimmed %}matching “{{ q }}”{% endblocktranslate %}{% endif %}
+        </p>
+      </div>
+
+      {% if kinds|length > 1 or kind %}
+        <nav class="chips" aria-label="{% translate 'File type' %}">
+          <a class="chip" href="{% querystring kind=None page=None %}"{% if not kind %} aria-current="true"{% endif %}>{% translate "Any type" %}</a>
+          {% for key, label, count in kinds %}
+            <a class="chip" href="{% querystring kind=key page=None %}"{% if key == kind %} aria-current="true"{% endif %}>{% icon key %}{{ label }}<span class="count">{{ count }}</span></a>
+          {% endfor %}
+        </nav>
+      {% endif %}
+
+      {% if page.object_list %}
+        <ul class="files {{ view }}" role="list">
+          {% for f in page.object_list %}
+            <li>
+              <a class="card" href="{% querystring file=f.pk %}"{% if selected == f %} aria-current="true"{% endif %}>
+                <span class="thumb kind-{{ f.kind }}">
+                  {% if f.thumbnail %}
+                    <img src="{% url 'file_thumbnail' f.pk %}" alt="" loading="lazy" decoding="async">
+                  {% else %}
+                    {% icon f.kind "icon thumb-icon" %}<span class="ext">{{ f.extension }}</span>
+                  {% endif %}
+                </span>
+                <span class="card-body">
+                  <span class="card-title">{{ f.title }}</span>
+                  <span class="card-meta">{{ f.size|filesizeformat }} · {{ f.extension|default:f.get_kind_display }}</span>
+                  {% if not category %}<span class="tag">{{ f.category.name }}</span>{% endif %}
+                  <span class="card-date muted">{{ f.upload_date|date:"SHORT_DATE_FORMAT" }}</span>
+                </span>
+              </a>
+            </li>
+          {% endfor %}
+        </ul>
+
+        {% if page.has_other_pages %}
+          <nav class="pagination" aria-label="{% translate 'Pages' %}">
+            {% if page.has_previous %}
+              <a class="button ghost" href="{% querystring page=page.previous_page_number file=None %}" rel="prev">{% icon "chevron-left" %}{% translate "Previous" %}</a>
+            {% endif %}
+            <span class="muted">{% blocktranslate with number=page.number total=page.paginator.num_pages %}Page {{ number }} of {{ total }}{% endblocktranslate %}</span>
+            {% if page.has_next %}
+              <a class="button ghost" href="{% querystring page=page.next_page_number file=None %}" rel="next">{% translate "Next" %}{% icon "chevron-right" %}</a>
+            {% endif %}
+          </nav>
+        {% endif %}
+      {% else %}
+        <div class="empty">
+          {% icon "search" "icon empty-icon" %}
+          {% if q or kind or category %}
+            <p>{% translate "Nothing matches these filters." %}</p>
+            <a class="button" href="{% url 'index' %}">{% translate "Show all files" %}</a>
+          {% else %}
+            <p>{% translate "The library is empty. Files added in the admin panel appear here." %}</p>
+            <a class="button primary" href="{% url 'admin:catalog_file_add' %}">{% icon "upload" %}{% translate "Upload a file" %}</a>
+          {% endif %}
+        </div>
+      {% endif %}
+    </div>
+  </main>
+
+  {% if selected %}
+    {% include "catalog/details.html" with file=selected %}
+  {% endif %}
+</div>
+{% endblock %}

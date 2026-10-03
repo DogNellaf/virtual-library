@@ -1,0 +1,13 @@
+{% extends "admin/login.html" %}
+{% load i18n static %}
+
+{% block extrastyle %}{{ block.super }}<link rel="stylesheet" href="{% static 'catalog/admin.css' %}">{% endblock %}
+
+{% block content %}
+{% if demo_username %}
+  <p class="demo-credentials">
+    {% blocktranslate trimmed %}Demo account <strong>{{ demo_username }}</strong>, password <strong>{{ demo_password }}</strong>.{% endblocktranslate %}
+  </p>
+{% endif %}
+{{ block.super }}
+{% endblock %}
