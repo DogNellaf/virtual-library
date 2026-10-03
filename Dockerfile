@@ -1,34 +1,24 @@
-# Dockerfile для Django-приложения
-FROM python:3.11-slim
+FROM python:3.13-slim
 
 ENV PYTHONDONTWRITEBYTECODE=1 \
     PYTHONUNBUFFERED=1 \
-    POETRY_VIRTUALENVS_CREATE=false
+    PIP_NO_CACHE_DIR=1 \
+    PIP_DISABLE_PIP_VERSION_CHECK=1
 
 WORKDIR /app
 
-# системные зависимости для psycopg2 и netcat
-RUN apt-get update && apt-get install -y --no-install-recommends \
-    gcc \
-    libpq-dev \
-    netcat-openbsd \
-  && rm -rf /var/lib/apt/lists/*
+# Every dependency ships as a wheel, so the image needs no compiler or libpq headers.
+COPY requirements.txt .
+RUN pip install -r requirements.txt
 
-# скопировать requirements и установить зависимости
-COPY requirements.txt /app/requirements.txt
-RUN pip install --upgrade pip
-RUN pip install -r /app/requirements.txt
-RUN pip install gunicorn  # Добавлена установка gunicorn
+RUN useradd --create-home --uid 1000 app && mkdir -p /app/media && chown -R app:app /app
+COPY --chown=app:app . .
 
-# копируем проект
-COPY . /app
-
-# делаем скрипт стартовый исполняемым
-COPY start.sh /start.sh
-RUN chmod +x /start.sh
-
-# порт приложения
+USER app
+RUN DJANGO_SECRET_KEY=collectstatic-only python manage.py collectstatic --noinput -v0
 EXPOSE 8000
+HEALTHCHECK --interval=10s --timeout=5s --start-period=30s --retries=5 \
+    CMD ["python", "-c", "import urllib.request; urllib.request.urlopen('http://localhost:8000/health/', timeout=4)"]
 
-# default command
-CMD ["/start.sh"]
+ENTRYPOINT ["docker/entrypoint.sh"]
+CMD ["gunicorn", "virtual_library.wsgi", "--bind", "0.0.0.0:8000", "--workers", "3", "--timeout", "120", "--access-logfile", "-"]
