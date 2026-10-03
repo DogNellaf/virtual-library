@@ -52,3 +52,16 @@ class SettingsTests(SimpleTestCase):
         )
         self.assertNotEqual(result.returncode, 0)
         self.assertIn("Set DJANGO_SECRET_KEY", result.stderr)
+
+    def test_only_postgresql_is_accepted(self):
+        env = {**os.environ, "DJANGO_SETTINGS_MODULE": "virtual_library.settings_test"}
+        env["DATABASE_URL"] = "sqlite:///db.sqlite3"
+        result = subprocess.run(
+            [sys.executable, "-c", "import django; django.setup()"],
+            env=env,
+            capture_output=True,
+            text=True,
+            check=False,
+        )
+        self.assertNotEqual(result.returncode, 0)
+        self.assertIn("DATABASE_URL must point to PostgreSQL", result.stderr)

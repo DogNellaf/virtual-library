@@ -5,7 +5,7 @@ from django.test import TestCase, override_settings
 from django.test.utils import CaptureQueriesContext
 from django.urls import reverse
 
-from catalog.models import File
+from catalog.models import File, search_key
 from catalog.tests.factories import TempMediaMixin, make_category, make_file, png_bytes
 
 
@@ -49,6 +49,15 @@ class CatalogTests(TempMediaMixin, TestCase):
         self.assertEqual(titles(self.get(q="report.pdf")), ["Annual report"])
         response = self.get(q="nothing like this")
         self.assertContains(response, "Nothing matches these filters.")
+
+    def test_search_uses_the_trigram_index(self):
+        files = File.objects.filter(search_text__contains=search_key("evening")).order_by()
+        with connection.cursor() as cursor:
+            # Four rows are cheaper to scan, so only an index lookup is left to the planner.
+            cursor.execute("SET LOCAL enable_seqscan = off")
+            cursor.execute("SET LOCAL enable_indexscan = off")
+            plan = files.explain()
+        self.assertIn("file_search_trgm", plan)
 
     def test_sorting(self):
         self.assertEqual(

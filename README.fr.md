@@ -60,7 +60,7 @@ fichier, et enregistré avec lui.
 | Type (image, document, audio, etc.) | Le filtre par type et les icônes |
 | Largeur et hauteur | Le panneau de détails |
 | Miniature WebP jusqu’à 640 px | La grille charge un petit aperçu au lieu de la photo d’origine |
-| Titre et texte en minuscules | Une recherche et un tri identiques sous SQLite et PostgreSQL |
+| Titre, description et nom de fichier en minuscules | Une recherche sans casse ni « ё », servie par un index trigramme |
 
 La page du catalogue exécute au plus 7 requêtes SQL, que la médiathèque contienne
 10 fichiers ou 10 000, et un test échoue si ce nombre augmente avec le nombre de
@@ -107,10 +107,11 @@ fichiers.
   fichier efface l’ancien fichier et sa miniature seulement après la validation
   de la transaction, et une annulation ne laisse jamais une ligne qui pointe
   vers rien.
-- **La recherche ignore la casse et le « ё ».** SQLite ne gère la casse que pour
-  l’ASCII, donc `Ёлка` ne correspondrait pas à `ёлка`. Chaque fichier garde une
-  copie de son titre et de son texte en minuscules, avec ё remplacé par е, et la
-  requête est transformée de la même façon.
+- **La recherche ignore la casse et le « ё » et utilise un index.** Chaque
+  fichier garde son titre, sa description et son nom en minuscules, avec ё
+  remplacé par е, et la requête est transformée de la même façon. `Ёлка` trouve
+  donc `ёлка` et `елка`. Un index GIN trigramme (`pg_trgm`) sert la recherche de
+  sous-chaîne, et un test vérifie que le plan de requête l’utilise.
 - **Les données existantes sont migrées.** Une migration de données remplit les
   tailles, les types et les miniatures des fichiers envoyés avant la refonte et
   renomme les catégories en double avant que le nom ne devienne unique. Un test
@@ -214,10 +215,11 @@ produit maintenu, il a fallu
 
 ## Lancer sans Docker
 
-Il faut Python 3.12 ou plus récent. Sans `DATABASE_URL`, un fichier SQLite local
-est utilisé.
+Il faut Python 3.12 ou plus récent et PostgreSQL. La base du fichier compose est
+publiée sur `localhost` et correspond au `DATABASE_URL` par défaut.
 
 ```bash
+docker compose up --detach db  # PostgreSQL on localhost:5432
 python -m venv .venv && source .venv/bin/activate
 pip install -r requirements-dev.txt
 export DJANGO_DEBUG=True DEMO_USERNAME=demo DEMO_PASSWORD=demo12345
@@ -238,7 +240,8 @@ Les réglages viennent des variables d’environnement ou d’un fichier `.env`.
 | `DJANGO_ALLOWED_HOSTS` | Noms d’hôtes séparés par des virgules | `localhost` en mode debug |
 | `DJANGO_CSRF_TRUSTED_ORIGINS` | Origines autorisées à envoyer des formulaires | aucune |
 | `DJANGO_TIME_ZONE` | Fuseau horaire des dates | `UTC` |
-| `DATABASE_URL` | Base de données, par exemple `postgres://user:pass@host/db` | SQLite dans `db.sqlite3` |
+| `DATABASE_URL` | Base PostgreSQL, par exemple `postgres://user:pass@host/db` | `postgres://library:library@localhost:5432/library` |
+| `DATABASE_PORT` | Port de la base de compose sur `localhost` | `5432` |
 | `MEDIA_ROOT` | Dossier des fichiers envoyés | `./media` |
 | `STORAGE_QUOTA_BYTES` | Quota initial pour tous les fichiers, `0` sans limite, modifiable ensuite dans l’administration | 50 Go |
 | `FILE_UPLOAD_MAX_BYTES` | Limite pour un fichier | 512 Mo |
@@ -256,12 +259,10 @@ recrée les données de démonstration.
 ## Tests
 
 ```bash
+# les tests ont besoin de PostgreSQL, celui de compose suffit
+docker compose up --detach db
 ruff check . && ruff format --check .
 coverage run manage.py test --settings=virtual_library.settings_test && coverage report
-
-# sous PostgreSQL, avec le test des envois parallèles
-DATABASE_URL=postgres://postgres:postgres@localhost:5432/library \
-  python manage.py test --settings=virtual_library.settings_test
 
 # test de fumée dans le navigateur et captures sur une pile lancée
 docker compose up --build --detach --wait
@@ -270,12 +271,13 @@ python docker/smoke_test.py
 python scripts/screenshots.py
 ```
 
-68 tests, couverture de 99 %, seuil de 90 % en CI. La CI les lance sous SQLite et
-PostgreSQL 17 avec Python 3.13 et sous SQLite avec Python 3.12, vérifie les
-migrations, les traductions et les réglages de production, puis construit
-l’image, démarre la pile et lance le test de fumée dans le navigateur. Il envoie
-et supprime un fichier via l’administration et échoue à la moindre erreur dans
-la console.
+70 tests, couverture de 99 %, seuil de 90 % en CI. La CI les lance sous
+PostgreSQL 17 avec Python 3.12 et 3.13, y compris la concurrence des envois
+parallèles et la vérification que la recherche utilise l’index trigramme. Elle
+vérifie aussi les migrations, les traductions et les réglages de production,
+puis construit l’image, démarre la pile et lance le test de fumée dans le
+navigateur. Il envoie et supprime un fichier via l’administration et échoue à la
+moindre erreur dans la console.
 
 ## Structure du projet
 

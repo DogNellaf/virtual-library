@@ -49,11 +49,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        python: ["3.13"]
-        database: [sqlite, postgres]
-        include:
-          - python: "3.12"
-            database: sqlite
+        python: ["3.12", "3.13"]
     services:
       postgres:
         image: postgres:17-alpine
@@ -75,7 +71,7 @@ jobs:
           coverage run manage.py test --settings=virtual_library.settings_test
           coverage report
         env:
-          DATABASE_URL: ${{ matrix.database == 'postgres' && 'postgres://postgres:postgres@localhost:5432/library' || '' }}
+          DATABASE_URL: postgres://postgres:postgres@localhost:5432/library
 
   e2e:
     runs-on: ubuntu-latest

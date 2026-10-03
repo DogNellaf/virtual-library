@@ -59,7 +59,7 @@ Datei gespeichert.
 | Typ (Bild, Dokument, Audio und so weiter) | Der Typfilter und die Symbole |
 | Breite und Höhe | Das Detailfenster |
 | WebP-Vorschaubild bis 640 px | Das Raster lädt eine kleine Vorschau statt des Originalfotos |
-| Titel und Text in Kleinbuchstaben | Suche und Sortierung verhalten sich unter SQLite und PostgreSQL gleich |
+| Titel, Beschreibung und Dateiname in Kleinbuchstaben | Suche ohne Groß- und Kleinschreibung und „ё“, über einen Trigramm-Index |
 
 Die Katalogseite stellt höchstens 7 SQL-Abfragen, egal ob die Mediathek 10 oder
 10 000 Dateien enthält, und ein Test schlägt fehl, sobald die Zahl mit der Menge
@@ -105,10 +105,12 @@ der Dateien wächst.
 - **Dateien auf der Platte folgen der Datenbank.** Beim Ersetzen oder Löschen
   verschwinden die alte Datei und ihr Vorschaubild erst nach dem Commit der
   Transaktion. Ein Rollback hinterlässt nie eine Zeile, die ins Leere zeigt.
-- **Die Suche ignoriert Groß- und Kleinschreibung und „ё“.** SQLite kennt
-  Kleinschreibung nur für ASCII, `Ёлка` würde also nicht zu `ёлка` passen. Jede
-  Datei speichert ihren Titel und Text in Kleinbuchstaben, mit е statt ё, und die
-  Suchanfrage wird genauso umgewandelt.
+- **Die Suche ignoriert Groß- und Kleinschreibung und „ё“ und nutzt einen
+  Index.** Jede Datei speichert Titel, Beschreibung und Dateinamen in
+  Kleinbuchstaben, mit е statt ё, und die Suchanfrage wird genauso umgewandelt.
+  `Ёлка` findet also `ёлка` und `елка`. Die Teilstringsuche läuft über einen
+  Trigramm-GIN-Index (`pg_trgm`), und ein Test prüft, dass der Abfrageplan ihn
+  verwendet.
 - **Bestehende Daten werden migriert.** Eine Datenmigration ergänzt Größen, Typen
   und Vorschaubilder für Dateien von vor der Überarbeitung und benennt doppelte
   Kategorien um, bevor der Name eindeutig wird. Ein Test führt sie mit Daten des
@@ -213,10 +215,11 @@ gepflegtes Produkt zu machen, waren nötig
 
 ## Ohne Docker starten
 
-Benötigt wird Python 3.12 oder neuer. Ohne `DATABASE_URL` wird eine lokale
-SQLite-Datei verwendet.
+Benötigt werden Python 3.12 oder neuer und PostgreSQL. Die Datenbank aus der
+Compose-Datei ist auf `localhost` erreichbar und passt zur Standard-`DATABASE_URL`.
 
 ```bash
+docker compose up --detach db  # PostgreSQL on localhost:5432
 python -m venv .venv && source .venv/bin/activate
 pip install -r requirements-dev.txt
 export DJANGO_DEBUG=True DEMO_USERNAME=demo DEMO_PASSWORD=demo12345
@@ -238,7 +241,8 @@ kommentiertes Beispiel für den Produktivbetrieb steht in
 | `DJANGO_ALLOWED_HOSTS` | Hostnamen, durch Kommas getrennt | `localhost` im Debug-Modus |
 | `DJANGO_CSRF_TRUSTED_ORIGINS` | Herkünfte, die Formulare senden dürfen | keine |
 | `DJANGO_TIME_ZONE` | Zeitzone für Datumsangaben | `UTC` |
-| `DATABASE_URL` | Datenbank, zum Beispiel `postgres://user:pass@host/db` | SQLite in `db.sqlite3` |
+| `DATABASE_URL` | PostgreSQL-Datenbank, zum Beispiel `postgres://user:pass@host/db` | `postgres://library:library@localhost:5432/library` |
+| `DATABASE_PORT` | Port der Compose-Datenbank auf `localhost` | `5432` |
 | `MEDIA_ROOT` | Ordner für hochgeladene Dateien | `./media` |
 | `STORAGE_QUOTA_BYTES` | Anfangskontingent für alle Dateien, `0` für unbegrenzt, danach in der Verwaltung änderbar | 50 GB |
 | `FILE_UPLOAD_MAX_BYTES` | Grenze für eine Datei | 512 MB |
@@ -256,12 +260,10 @@ die Demodaten neu an.
 ## Tests
 
 ```bash
+# die Tests brauchen PostgreSQL, die Datenbank aus compose genügt
+docker compose up --detach db
 ruff check . && ruff format --check .
 coverage run manage.py test --settings=virtual_library.settings_test && coverage report
-
-# unter PostgreSQL, mit dem Test für parallele Uploads
-DATABASE_URL=postgres://postgres:postgres@localhost:5432/library \
-  python manage.py test --settings=virtual_library.settings_test
 
 # Smoke-Test im Browser und Screenshots gegen einen laufenden Stack
 docker compose up --build --detach --wait
@@ -270,12 +272,13 @@ python docker/smoke_test.py
 python scripts/screenshots.py
 ```
 
-68 Tests mit 99 % Abdeckung, die Schwelle in der CI liegt bei 90 %. Die CI führt
-sie unter SQLite und PostgreSQL 17 mit Python 3.13 und unter SQLite mit
-Python 3.12 aus, prüft Migrationen, Übersetzungen und die Produktiveinstellungen,
-baut dann das Image, startet den Stack und lässt den Smoke-Test im Browser
-laufen. Er lädt eine Datei über die Verwaltung hoch, löscht sie wieder und
-schlägt bei jedem Fehler in der Konsole fehl.
+70 Tests mit 99 % Abdeckung, die Schwelle in der CI liegt bei 90 %. Die CI
+führt sie unter PostgreSQL 17 mit Python 3.12 und 3.13 aus, einschließlich des
+Wettrennens paralleler Uploads und der Prüfung, dass die Suche den
+Trigramm-Index nutzt. Außerdem prüft sie Migrationen, Übersetzungen und die
+Produktiveinstellungen, baut dann das Image, startet den Stack und lässt den
+Smoke-Test im Browser laufen. Er lädt eine Datei über die Verwaltung hoch,
+löscht sie wieder und schlägt bei jedem Fehler in der Konsole fehl.
 
 ## Projektstruktur
 

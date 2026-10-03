@@ -54,7 +54,7 @@ stored next to it.
 | Type (image, document, audio and so on) | The type filter and the icons |
 | Width and height | The details panel |
 | WebP thumbnail up to 640 px | The grid loads a small preview instead of the original photo |
-| Case-folded title and text | Search and sorting that behave the same on SQLite and PostgreSQL |
+| Folded title, description and file name | Search that ignores case and "ё", served by a trigram index |
 
 The catalog page runs at most 7 SQL queries whether the library holds 10 files
 or 10 000, and a test fails if that number grows with the number of files.
@@ -95,9 +95,11 @@ or 10 000, and a test fails if that number grows with the number of files.
 - **Files on disk follow the database.** Replacing or deleting a file removes
   the old file and thumbnail only after the transaction commits, so a rollback
   never leaves a row that points to nothing.
-- **Search ignores case and "ё".** SQLite only folds ASCII case, so `Ёлка` would
-  not match `ёлка`. Each file stores a case-folded copy of its title and text
-  with ё replaced by е, and the query is folded the same way.
+- **Search ignores case and "ё" and uses an index.** Each file stores its
+  title, description and file name in lower case with ё replaced by е, and the
+  query is folded the same way, so `Ёлка` finds `ёлка` and `елка`. A trigram GIN
+  index (`pg_trgm`) serves the substring search, and a test checks that the
+  query plan uses it.
 - **Existing data is migrated.** A data migration fills sizes, types and
   thumbnails for files uploaded before the overhaul and renames duplicate
   categories before the name becomes unique. A test runs it on prototype data.
@@ -194,9 +196,11 @@ maintained product involved
 
 ## Running without Docker
 
-You need Python 3.12 or newer. Without `DATABASE_URL` a local SQLite file is used.
+You need Python 3.12 or newer and PostgreSQL. The database from the compose
+file is published on `localhost` and matches the default `DATABASE_URL`.
 
 ```bash
+docker compose up --detach db  # PostgreSQL on localhost:5432
 python -m venv .venv && source .venv/bin/activate
 pip install -r requirements-dev.txt
 export DJANGO_DEBUG=True DEMO_USERNAME=demo DEMO_PASSWORD=demo12345
@@ -217,7 +221,8 @@ Settings come from environment variables or a `.env` file. See
 | `DJANGO_ALLOWED_HOSTS` | Comma-separated host names | `localhost` in debug |
 | `DJANGO_CSRF_TRUSTED_ORIGINS` | Origins allowed to post forms | none |
 | `DJANGO_TIME_ZONE` | Time zone for dates | `UTC` |
-| `DATABASE_URL` | Database, for example `postgres://user:pass@host/db` | SQLite in `db.sqlite3` |
+| `DATABASE_URL` | PostgreSQL database, for example `postgres://user:pass@host/db` | `postgres://library:library@localhost:5432/library` |
+| `DATABASE_PORT` | Port of the compose database on `localhost` | `5432` |
 | `MEDIA_ROOT` | Directory for uploaded files | `./media` |
 | `STORAGE_QUOTA_BYTES` | Initial quota for all files, `0` for no limit, then editable in the admin | 50 GB |
 | `FILE_UPLOAD_MAX_BYTES` | Limit for one upload | 512 MB |
@@ -235,12 +240,10 @@ creates the demo content again.
 ## Tests
 
 ```bash
+# the tests need PostgreSQL, the one from compose will do
+docker compose up --detach db
 ruff check . && ruff format --check .
 coverage run manage.py test --settings=virtual_library.settings_test && coverage report
-
-# against PostgreSQL, including the parallel upload test
-DATABASE_URL=postgres://postgres:postgres@localhost:5432/library \
-  python manage.py test --settings=virtual_library.settings_test
 
 # browser smoke test and screenshots against a running stack
 docker compose up --build --detach --wait
@@ -249,11 +252,12 @@ python docker/smoke_test.py
 python scripts/screenshots.py
 ```
 
-There are 68 tests with 99% coverage, and the CI threshold is 90%. CI runs them
-on SQLite and PostgreSQL 17 with Python 3.13 and on SQLite with Python 3.12,
-checks migrations, translations and the production settings, then builds the
-image, starts the stack and runs the browser smoke test. It uploads and deletes
-a file through the admin and fails on any console error.
+There are 70 tests with 99% coverage, and the CI threshold is 90%. CI runs them
+on PostgreSQL 17 with Python 3.12 and 3.13, including the parallel upload race
+and the check that search uses the trigram index. It also checks migrations,
+translations and the production settings, then builds the image, starts the
+stack and runs the browser smoke test. It uploads and deletes a file through the
+admin and fails on any console error.
 
 ## Project structure
 

@@ -1,7 +1,6 @@
 import threading
-import unittest
 
-from django.db import connection, connections, transaction
+from django.db import connections, transaction
 from django.test import TestCase, TransactionTestCase, override_settings
 
 from catalog import services
@@ -58,7 +57,6 @@ class QuotaTests(TempMediaMixin, TestCase):
         self.assertEqual(services.used_bytes(), 0)
 
 
-@unittest.skipUnless(connection.vendor == "postgresql", "row locks need PostgreSQL")
 class ConcurrentUploadTests(TempMediaMixin, TransactionTestCase):
     """Two uploads race for the last free bytes. Exactly one of them may win."""
 

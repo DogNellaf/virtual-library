@@ -35,6 +35,7 @@ INSTALLED_APPS = [
     "django.contrib.messages",
     "whitenoise.runserver_nostatic",
     "django.contrib.staticfiles",
+    "django.contrib.postgres",
     "catalog",
 ]
 
@@ -72,8 +73,13 @@ TEMPLATES = [
 
 WSGI_APPLICATION = "virtual_library.wsgi.application"
 
-DATABASE_URL = env.str("DATABASE_URL", default="") or f"sqlite:///{BASE_DIR / 'db.sqlite3'}"
+# PostgreSQL only. The default matches the database from docker-compose.yml.
+DATABASE_URL = (
+    env.str("DATABASE_URL", default="") or "postgres://library:library@localhost:5432/library"
+)
 DATABASES = {"default": env.db_url_config(DATABASE_URL)}
+if DATABASES["default"]["ENGINE"] != "django.db.backends.postgresql":
+    raise ImproperlyConfigured("DATABASE_URL must point to PostgreSQL.")
 DATABASES["default"]["CONN_MAX_AGE"] = env.int("DATABASE_CONN_MAX_AGE", default=60)
 DATABASES["default"]["CONN_HEALTH_CHECKS"] = True
 

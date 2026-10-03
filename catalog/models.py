@@ -1,6 +1,7 @@
 from pathlib import PurePath
 
 from django.conf import settings
+from django.contrib.postgres.indexes import GinIndex
 from django.db import models, transaction
 from django.urls import reverse
 from django.utils.translation import gettext_lazy as _
@@ -9,7 +10,7 @@ from catalog import media
 
 
 def search_key(text: str) -> str:
-    """Case- and ё-insensitive form of a string, the same on SQLite and PostgreSQL."""
+    """Case- and ё-insensitive form of a string, used for search and sorting."""
     return " ".join(text.casefold().replace("ё", "е").split())
 
 
@@ -63,6 +64,10 @@ class File(models.Model):
         verbose_name = _("file")
         verbose_name_plural = _("files")
         ordering = ["-upload_date", "-id"]
+        indexes = [
+            # Lets the substring search (LIKE '%...%') use an index instead of a full scan.
+            GinIndex(fields=["search_text"], opclasses=["gin_trgm_ops"], name="file_search_trgm"),
+        ]
 
     def __str__(self):
         return self.title
